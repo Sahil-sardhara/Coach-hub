@@ -19,17 +19,41 @@ class EventCard extends StatelessWidget {
   });
 
   // Helper method to extract only the date part (e.g., "15 Nov, 2025")
-  String _extractDisplayDate(String input) {
+  String _extractDisplayDate(String raw) {
     try {
-      final formatted = _formatTime(input); // Output: "TIME, DAY MONTH, YEAR"
-      final parts = formatted.split(",");
-      if (parts.length >= 3) {
-        // Returns the DAY MONTH (index 1) and YEAR (index 2) combined
-        return "${parts[1].trim()}, ${parts[2].trim()}";
-      }
-      return input.split(",")[1].trim();
+      // raw = "10:00 AM, Oct 28 2025"
+      final parts = raw.split(',');
+      if (parts.length < 2) return "Invalid Date";
+
+      final date = parts[1].trim(); // "Oct 28 2025"
+      final split = date.split(" ");
+
+      if (split.length != 3) return date;
+
+      final monthAbbr = split[0];
+      final day = split[1];
+      final year = split[2];
+
+      const monthMap = {
+        "Jan": "January",
+        "Feb": "February",
+        "Mar": "March",
+        "Apr": "April",
+        "May": "May",
+        "Jun": "June",
+        "Jul": "July",
+        "Aug": "August",
+        "Sep": "September",
+        "Oct": "October",
+        "Nov": "November",
+        "Dec": "December",
+      };
+
+      final fullMonth = monthMap[monthAbbr] ?? monthAbbr;
+
+      return "$fullMonth $day, $year";
     } catch (e) {
-      return "Date Invalid";
+      return "Invalid Date";
     }
   }
 

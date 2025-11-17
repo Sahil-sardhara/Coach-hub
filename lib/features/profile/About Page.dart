@@ -6,9 +6,8 @@ class AboutPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
-
     return Scaffold(
+      backgroundColor: AppColors.background,
       appBar: AppBar(
         title: const Text("About"),
         backgroundColor: AppColors.primary,
@@ -16,19 +15,26 @@ class AboutPage extends StatelessWidget {
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(16),
         child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            _buildCard(
+            _settingsTile(
+              icon: Icons.info_outline,
               title: "About This App",
-              content:
-                  "This is a mock educational app created for demonstration purposes. It showcases a profile page, edit profile functionality, terms & conditions, settings, and other features.",
-              isDark: isDark,
+              subtitle:
+                  "This is a mock educational app created for demonstration purposes, showcasing events, profiles, settings and Zoom meeting UI.",
             ),
-            _buildCard(title: "Version", content: "1.0.0", isDark: isDark),
-            _buildCard(
+            const SizedBox(height: 15),
+
+            _settingsTile(
+              icon: Icons.verified,
+              title: "Version",
+              subtitle: "1.0.0",
+            ),
+            const SizedBox(height: 15),
+
+            _settingsTile(
+              icon: Icons.email_outlined,
               title: "Contact",
-              content: "Email: support@test.com\nPhone: +123 456 7890",
-              isDark: isDark,
+              subtitle: "support@test.com\nPhone: +123 456 7890",
             ),
           ],
         ),
@@ -36,40 +42,87 @@ class AboutPage extends StatelessWidget {
     );
   }
 
-  Widget _buildCard({
+  // -------------------------------------------------------
+  //  PROFILE-STYLE NEUMORPHIC TILE
+  // -------------------------------------------------------
+  Widget _settingsTile({
+    required IconData icon,
     required String title,
-    required String content,
-    required bool isDark,
+    required String subtitle,
   }) {
-    return Card(
-      color: isDark ? Colors.grey[900] : Colors.white,
-      elevation: 6,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-      margin: const EdgeInsets.only(bottom: 16),
-      child: Padding(
-        padding: const EdgeInsets.all(20),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              title,
-              style: TextStyle(
-                fontSize: 22,
-                fontWeight: FontWeight.bold,
-                color: AppColors.primary,
-              ),
+    return Container(
+      padding: const EdgeInsets.all(18),
+      decoration: BoxDecoration(
+        color: AppColors.background,
+        borderRadius: BorderRadius.circular(20),
+        boxShadow: const [
+          // Light Shadow (top-left)
+          BoxShadow(
+            color: AppColors.lightShadow,
+            blurRadius: 6,
+            offset: Offset(-4, -4),
+          ),
+
+          // Dark Shadow (bottom-right)
+          BoxShadow(
+            color: AppColors.darkShadow,
+            blurRadius: 6,
+            offset: Offset(4, 4),
+          ),
+        ],
+      ),
+      child: Row(
+        children: [
+          // Leading Icon Circle
+          Container(
+            padding: const EdgeInsets.all(12),
+            decoration: BoxDecoration(
+              color: AppColors.background,
+              shape: BoxShape.circle,
+              boxShadow: const [
+                BoxShadow(
+                  color: AppColors.lightShadow,
+                  blurRadius: 6,
+                  offset: Offset(-3, -3),
+                ),
+                BoxShadow(
+                  color: AppColors.darkShadow,
+                  blurRadius: 6,
+                  offset: Offset(3, 3),
+                ),
+              ],
             ),
-            const SizedBox(height: 12),
-            Text(
-              content,
-              style: TextStyle(
-                fontSize: 16,
-                height: 1.5,
-                color: isDark ? Colors.white70 : Colors.black87,
-              ),
+            child: Icon(icon, color: AppColors.primary),
+          ),
+
+          const SizedBox(width: 18),
+
+          // Text Content
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  title,
+                  style: const TextStyle(
+                    fontSize: 17,
+                    fontWeight: FontWeight.bold,
+                    color: AppColors.textDark,
+                  ),
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  subtitle,
+                  style: const TextStyle(
+                    fontSize: 14,
+                    color: AppColors.textLight,
+                    height: 1.4,
+                  ),
+                ),
+              ],
             ),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }

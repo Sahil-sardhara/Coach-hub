@@ -1,4 +1,5 @@
 import 'package:coach_hub/core/profile_provider.dart';
+import 'package:coach_hub/features/navigation/bottom_navbar.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'core/theme/app_colors.dart';
@@ -58,7 +59,7 @@ class MyApp extends StatelessWidget {
           unselectedItemColor: Colors.grey[400],
         ),
       ),
-      home: HomePage(),
+      home: BottomNavBar(),
     );
   }
 }

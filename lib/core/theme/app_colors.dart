@@ -1,20 +1,48 @@
 import 'package:flutter/material.dart';
 
 class AppColors {
-  // Original Colors
-  static const primary = Color.fromARGB(
-    255,
-    7,
-    134,
-    50,
-  ); // Fresh Blue (based on R,G,B values, which is actually a dark green)
-  static const secondary = Color(0xFF5A85F0);
-  static const background = Color(0xFFF4F7FF);
-  static const textDark = Color(0xFF1A1A1A);
-  static const textLight = Color(0xFF6D6D6D);
+  // ---------------------------------------------------------
+  // BRAND COLORS
+  // ---------------------------------------------------------
+  static const primary = Color.fromARGB(255, 7, 134, 50);
+  // Your main green (used on buttons, icons, highlights)
 
-  // New Color: Light Green/Mint for Card Background
-  static const cardBackground = Color(
-    0xFFE8F5E9,
-  ); // A very light, pale mint/green (similar to Material's 50 shade for Green)
+  static const secondary = Color(0xFF5A85F0);
+  // Not heavily used but kept for design flexibility
+
+  // ---------------------------------------------------------
+  // TEXT COLORS
+  // ---------------------------------------------------------
+  static const textDark = Color(0xFF1A1A1A); // Main dark text
+  static const textLight = Color(0xFF6D6D6D); // Subtitle / grey text
+
+  // ---------------------------------------------------------
+  // BACKGROUND COLORS (Neumorphism)
+  // ---------------------------------------------------------
+  static const background = Color(0xffF2F3F7);
+  // SAME background used on:
+  // ✔ Profile page
+  // ✔ Home page
+  // ✔ Neumorphic cards
+  // ✔ Search bar
+  // This is the most important UI color in your theme.
+
+  // ---------------------------------------------------------
+  // CARD BACKGROUND (light green hint)
+  // ---------------------------------------------------------
+  static const cardBackground = Color(0xFFE8F5E9);
+  // Very light mint green (Material Green 50)
+
+  // ---------------------------------------------------------
+  // NEUMORPHISM SHADOWS
+  // ---------------------------------------------------------
+  static const lightShadow = Colors.white;
+  static const darkShadow = Color.fromARGB(30, 0, 0, 0); // soft black12
+
+  // ---------------------------------------------------------
+  // OPTIONAL EXTRA COLORS (if needed later)
+  // ---------------------------------------------------------
+  static const danger = Color(0xFFE53935); // Red warning/logout
+  static const success = Color(0xFF4CAF50); // Success green
+  static const warning = Color(0xFFFFC107); // Yellow warning
 }
