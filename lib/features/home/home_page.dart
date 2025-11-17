@@ -23,19 +23,21 @@ class _HomePageState extends State<HomePage> {
       title: "Startup Pitch Day & Networking Mixer",
       time: "10:00 AM, Oct 28 2025",
       description:
-          "**Relive the excitement!** This highly-anticipated annual event featured 15 top student-led startups...",
+          "**Relive the excitement!** This highly-anticipated annual event featured 15 top student-led startups annual event featured 15 top student-led startups annual event featured 15 top student-led startups",
       imageUrl: "https://picsum.photos/400/200?random=4",
     ),
     Event(
       title: "AI Trends & Ethical Governance Talk (LIVE)",
       time: "4:30 PM, Nov 14 2025",
-      description: "**Happening now!** Join leading expert Dr. Ben Carter...",
+      description:
+          "**Happening now!** Join leading expert Dr. Ben Carter Join leading expert Dr. Ben Carter Join leading expert Dr. Ben Carter Join leading expert Dr. Ben Carter",
       imageUrl: "https://picsum.photos/400/200?random=5",
     ),
     Event(
       title: "Tech Seminar: Next-Gen Flutter & Flow Development",
       time: "3 PM, Nov 15 2025",
-      description: "Discover the future of cross-platform development...",
+      description:
+          "Discover the future of cross-platform development the future of cross-platform development the future of cross-platform development the future of cross-platform development",
       imageUrl: "https://picsum.photos/400/200?random=1",
     ),
   ];
@@ -214,7 +216,7 @@ class _HomePageState extends State<HomePage> {
             // Description
             Text(
               event.description,
-              maxLines: 3,
+              maxLines: 8,
               overflow: TextOverflow.ellipsis,
               style: const TextStyle(
                 fontSize: 14,
