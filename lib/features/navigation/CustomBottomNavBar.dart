@@ -1,14 +1,16 @@
-import 'package:coach_hub/core/theme/app_colors.dart';
 import 'package:flutter/material.dart';
+import '../../core/theme/app_colors.dart';
 
 class CustomBottomNavBar extends StatelessWidget {
   final int currentIndex;
+  final bool isDark;
   final Function(int) onTap;
 
   const CustomBottomNavBar({
     super.key,
     required this.currentIndex,
     required this.onTap,
+    required this.isDark,
   });
 
   @override
@@ -16,21 +18,20 @@ class CustomBottomNavBar extends StatelessWidget {
     return Container(
       margin: const EdgeInsets.only(left: 20, right: 20, bottom: 30),
       height: 70,
+
       decoration: BoxDecoration(
-        color: AppColors.background, // SAME THEME COLOR
+        color: isDark
+            ? AppColors.darkBackground.withOpacity(0.95)
+            : AppColors.background.withOpacity(0.95),
         borderRadius: BorderRadius.circular(25),
 
-        // NEUMORPHIC EFFECT
-        boxShadow: const [
+        // ⭐ SOFT TOP SHADOW ONLY
+        boxShadow: [
           BoxShadow(
-            color: AppColors.lightShadow, // top-left highlight
-            blurRadius: 12,
-            offset: Offset(-4, -4),
-          ),
-          BoxShadow(
-            color: AppColors.darkShadow, // bottom-right shadow
-            blurRadius: 12,
-            offset: Offset(4, 4),
+            color: Colors.black.withOpacity(0.08),
+            blurRadius: 20,
+            spreadRadius: 2,
+            offset: const Offset(0, -6), // shadow only ABOVE navbar
           ),
         ],
       ),
@@ -52,34 +53,23 @@ class CustomBottomNavBar extends StatelessWidget {
     return GestureDetector(
       onTap: () => onTap(index),
       child: AnimatedContainer(
-        duration: const Duration(milliseconds: 220),
-
-        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+        duration: const Duration(milliseconds: 200),
+        padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 10),
         decoration: BoxDecoration(
           color: selected
               ? AppColors.primary.withOpacity(0.15)
               : Colors.transparent,
-
           borderRadius: BorderRadius.circular(15),
-
-          // subtle inner shadow when selected
-          boxShadow: selected
-              ? [
-                  BoxShadow(
-                    color: AppColors.primary.withOpacity(0.25),
-                    blurRadius: 10,
-                    offset: const Offset(0, 4),
-                  ),
-                ]
-              : [],
         ),
 
         child: Row(
           children: [
             Icon(
               icon,
+              color: selected
+                  ? AppColors.primary
+                  : (isDark ? AppColors.darkSubText : AppColors.textLight),
               size: 28,
-              color: selected ? AppColors.primary : AppColors.textLight,
             ),
 
             if (selected) ...[

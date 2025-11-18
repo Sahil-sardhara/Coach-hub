@@ -1,24 +1,32 @@
 import 'package:flutter/material.dart';
 import 'app_colors.dart';
-import 'package:google_fonts/google_fonts.dart';
 
 class AppTheme {
-  static ThemeData lightTheme = ThemeData(
+  static final ThemeData lightTheme = ThemeData(
+    brightness: Brightness.light,
     scaffoldBackgroundColor: AppColors.background,
     primaryColor: AppColors.primary,
-    textTheme: GoogleFonts.poppinsTextTheme(),
-    appBarTheme: AppBarTheme(
+    appBarTheme: const AppBarTheme(
       backgroundColor: AppColors.primary,
-      elevation: 0,
-      titleTextStyle: GoogleFonts.poppins(
-        color: Colors.white,
-        fontSize: 18,
-        fontWeight: FontWeight.w600,
-      ),
+      foregroundColor: Colors.white,
     ),
-    bottomNavigationBarTheme: BottomNavigationBarThemeData(
-      selectedItemColor: AppColors.primary,
-      unselectedItemColor: AppColors.textLight,
+    textTheme: const TextTheme(
+      bodyMedium: TextStyle(color: AppColors.textDark),
+      bodySmall: TextStyle(color: AppColors.textLight),
+    ),
+  );
+
+  static final ThemeData darkTheme = ThemeData(
+    brightness: Brightness.dark,
+    scaffoldBackgroundColor: AppColors.darkBackground,
+    primaryColor: AppColors.primary,
+    appBarTheme: const AppBarTheme(
+      backgroundColor: AppColors.primary,
+      foregroundColor: Colors.white,
+    ),
+    textTheme: const TextTheme(
+      bodyMedium: TextStyle(color: AppColors.darkText),
+      bodySmall: TextStyle(color: AppColors.darkSubText),
     ),
   );
 }

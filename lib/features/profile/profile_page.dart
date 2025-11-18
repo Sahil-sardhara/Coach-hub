@@ -1,11 +1,12 @@
-import 'package:coach_hub/core/profile_provider.dart';
-import 'package:coach_hub/features/profile/About%20Page.dart';
-import 'package:coach_hub/features/profile/EditProfilePage.dart';
-import 'package:coach_hub/features/profile/Settings%20Page.dart';
+import 'package:coach_hub/core/theme/dark_mode.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../core/theme/app_colors.dart';
-import '../../core/theme/dark_mode.dart';
+import '../../core/profile_provider.dart';
+import '../../core/theme/neumorphic_box.dart';
+import 'EditProfilePage.dart';
+import 'Settings Page.dart';
+import 'About Page.dart';
 import '../auth/login_page.dart';
 
 class ProfilePage extends StatelessWidget {
@@ -13,46 +14,33 @@ class ProfilePage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final isDark = Provider.of<ThemeProvider>(context).isDarkMode;
-    final profile = Provider.of<ProfileProvider>(context);
+    final isDark = context.watch<ThemeProvider>().isDarkMode;
+    final profile = context.watch<ProfileProvider>();
 
     return Scaffold(
-      backgroundColor: isDark ? Colors.black : const Color(0xffF2F3F7),
-
+      backgroundColor: isDark ? AppColors.darkBackground : AppColors.background,
       body: SafeArea(
         child: Column(
           children: [
-            // ---------------- HEADER ----------------
-            _buildHeader(profile),
-
+            _buildHeader(profile, isDark),
             const SizedBox(height: 20),
-
-            // ---------------- SETTINGS LIST ----------------
             Expanded(
               child: SingleChildScrollView(
                 padding: const EdgeInsets.symmetric(horizontal: 20),
                 child: Column(
                   children: [
-                    // _settingsTile(
-                    //   icon: Icons.notifications_rounded,
-                    //   title: "Notifications",
-                    //   subtitle: "Manage your reminders",
-                    //   onTap: () {},
-                    // ),
                     _settingsTile(
                       icon: Icons.edit,
                       title: "Edit Profile",
                       subtitle: "Update your personal details",
+                      isDark: isDark,
                       onTap: () {
                         Navigator.push(
                           context,
                           MaterialPageRoute(
                             builder: (_) => EditProfilePage(
                               name: profile.name,
-                              course: profile.course,
-                              location: profile.location,
                               email: profile.email,
-                              phone: profile.phone,
                             ),
                           ),
                         );
@@ -60,12 +48,15 @@ class ProfilePage extends StatelessWidget {
                     ),
                     _settingsTile(
                       icon: Icons.settings,
-                      title: "Setting",
+                      title: "Settings",
                       subtitle: "Manage your app preferences",
+                      isDark: isDark,
                       onTap: () {
                         Navigator.push(
                           context,
-                          MaterialPageRoute(builder: (_) => SettingsPage()),
+                          MaterialPageRoute(
+                            builder: (_) => const SettingsPage(),
+                          ),
                         );
                       },
                     ),
@@ -73,10 +64,11 @@ class ProfilePage extends StatelessWidget {
                       icon: Icons.info_outline_rounded,
                       title: "About",
                       subtitle: "App version 1.0.0",
+                      isDark: isDark,
                       onTap: () {
                         Navigator.push(
                           context,
-                          MaterialPageRoute(builder: (_) => AboutPage()),
+                          MaterialPageRoute(builder: (_) => const AboutPage()),
                         );
                       },
                     ),
@@ -84,9 +76,9 @@ class ProfilePage extends StatelessWidget {
                       icon: Icons.logout_rounded,
                       title: "Logout",
                       subtitle: "Sign out of your account",
+                      isDark: isDark,
                       onTap: () => _showLogoutDialog(context),
                     ),
-
                     const SizedBox(height: 40),
                   ],
                 ),
@@ -98,30 +90,21 @@ class ProfilePage extends StatelessWidget {
     );
   }
 
-  // ----------------------------------------------------------
-  // HEADER WITH GLOW AVATAR
-  // ----------------------------------------------------------
-  Widget _buildHeader(ProfileProvider profile) {
+  Widget _buildHeader(ProfileProvider profile, bool isDark) {
     return Container(
       height: 190,
       decoration: const BoxDecoration(
-        gradient: LinearGradient(
-          colors: [Color(0xffF8F9FB), Color(0xffECEEF3)],
-          begin: Alignment.topCenter,
-          end: Alignment.bottomCenter,
-        ),
         borderRadius: BorderRadius.vertical(bottom: Radius.circular(40)),
       ),
       child: Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            // Avatar glow
             Container(
               padding: const EdgeInsets.all(4),
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
-                color: Colors.white,
+                color: isDark ? AppColors.darkCard : Colors.white,
                 boxShadow: [
                   BoxShadow(
                     color: AppColors.primary.withOpacity(0.4),
@@ -136,15 +119,13 @@ class ProfilePage extends StatelessWidget {
                 child: Icon(Icons.person, size: 50, color: AppColors.primary),
               ),
             ),
-
             const SizedBox(height: 10),
-
             Text(
               profile.name,
-              style: const TextStyle(
+              style: TextStyle(
                 fontSize: 23,
                 fontWeight: FontWeight.bold,
-                color: Color(0xff222222),
+                color: isDark ? AppColors.darkText : AppColors.textDark,
               ),
             ),
           ],
@@ -153,25 +134,16 @@ class ProfilePage extends StatelessWidget {
     );
   }
 
-  // ----------------------------------------------------------
-  // SETTINGS TILE (NEUMORPHISM STYLE)
-  // ----------------------------------------------------------
   Widget _settingsTile({
     required IconData icon,
     required String title,
     required String subtitle,
     required VoidCallback onTap,
+    required bool isDark,
   }) {
     return Container(
       margin: const EdgeInsets.symmetric(vertical: 10),
-      decoration: BoxDecoration(
-        color: const Color(0xffF2F3F7),
-        borderRadius: BorderRadius.circular(18),
-        boxShadow: const [
-          BoxShadow(color: Colors.white, blurRadius: 6, offset: Offset(-4, -4)),
-          BoxShadow(color: Colors.black12, blurRadius: 6, offset: Offset(4, 4)),
-        ],
-      ),
+      decoration: neumorphicBox(isDark),
       child: ListTile(
         contentPadding: const EdgeInsets.symmetric(
           vertical: 12,
@@ -187,35 +159,68 @@ class ProfilePage extends StatelessWidget {
         ),
         title: Text(
           title,
-          style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
+          style: TextStyle(
+            fontSize: 16,
+            fontWeight: FontWeight.w600,
+            color: isDark ? AppColors.darkText : AppColors.textDark,
+          ),
         ),
         subtitle: Text(
           subtitle,
-          style: const TextStyle(fontSize: 13, color: Colors.black54),
+          style: TextStyle(
+            fontSize: 13,
+            color: isDark ? AppColors.darkSubText : AppColors.textLight,
+          ),
         ),
-        trailing: const Icon(Icons.arrow_forward_ios, size: 16),
+        trailing: Icon(
+          Icons.arrow_forward_ios,
+          size: 16,
+          color: isDark ? AppColors.darkSubText : AppColors.textLight,
+        ),
         onTap: onTap,
       ),
     );
   }
 
-  // ----------------------------------------------------------
-  // LOGOUT POPUP
-  // ----------------------------------------------------------
   void _showLogoutDialog(BuildContext context) {
+    final isDark = context.read<ThemeProvider>().isDarkMode;
+
     showDialog(
       context: context,
       builder: (_) => AlertDialog(
+        backgroundColor: isDark ? AppColors.darkCard : AppColors.background,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
-        title: const Text("Logout"),
-        content: const Text("Are you sure you want to logout?"),
+        title: Text(
+          "Logout",
+          style: TextStyle(
+            color: isDark ? AppColors.darkText : AppColors.textDark,
+            fontWeight: FontWeight.bold,
+          ),
+        ),
+        content: Text(
+          "Are you sure you want to logout?",
+          style: TextStyle(
+            color: isDark ? AppColors.darkSubText : AppColors.textLight,
+          ),
+        ),
         actions: [
           TextButton(
-            child: const Text("Cancel"),
+            child: Text(
+              "Cancel",
+              style: TextStyle(
+                color: isDark ? AppColors.darkSubText : AppColors.textDark,
+              ),
+            ),
             onPressed: () => Navigator.pop(context),
           ),
+
           ElevatedButton(
-            style: ElevatedButton.styleFrom(backgroundColor: Colors.redAccent),
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Colors.redAccent,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(8),
+              ),
+            ),
             onPressed: () {
               Navigator.pop(context);
               Navigator.pushReplacement(

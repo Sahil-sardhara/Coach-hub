@@ -1,164 +1,66 @@
-import 'package:coach_hub/core/theme/app_colors.dart';
-import 'package:coach_hub/model/Event_Model.dart';
+import 'package:coach_hub/core/theme/dark_mode.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import '../../core/theme/app_colors.dart';
 
 class MockZoomMeetingPage extends StatefulWidget {
-  final Event? event;
-
-  const MockZoomMeetingPage({Key? key, this.event}) : super(key: key);
+  const MockZoomMeetingPage({super.key});
 
   @override
-  _MockZoomMeetingPageState createState() => _MockZoomMeetingPageState();
+  State<MockZoomMeetingPage> createState() => _MockZoomMeetingPageState();
 }
 
 class _MockZoomMeetingPageState extends State<MockZoomMeetingPage> {
-  bool _inMeeting = false;
-  String _meetingId = "123456"; // default mock meeting ID
-  String _password = "123456"; // default password
+  bool inMeeting = false;
+  bool obscure = true;
 
-  final TextEditingController meetingIdController = TextEditingController(
-    text: "123456",
-  );
+  bool micOn = true;
+  bool camOn = true;
+  bool speakerOn = true;
 
-  final TextEditingController passwordController = TextEditingController(
-    text: "123456",
-  );
-
-  void _joinMeeting() {
-    setState(() {
-      _inMeeting = true;
-    });
-  }
-
-  void _leaveMeeting() {
-    setState(() {
-      _inMeeting = false;
-    });
-  }
+  final idCtrl = TextEditingController(text: "123456");
+  final pwdCtrl = TextEditingController(text: "123456");
 
   @override
   Widget build(BuildContext context) {
-    return _inMeeting ? _zoomMeetingUI() : _joinMeetingUI();
+    final isDark = context.watch<ThemeProvider>().isDarkMode;
+
+    return inMeeting ? _meetingUI(isDark) : _joinUI(isDark);
   }
 
-  // -------------------------------------------------------------
-  // JOIN SCREEN (Before joining meeting)
-  // -------------------------------------------------------------
-  Widget _joinMeetingUI() {
+  // -----------------------------------------------------
+  // JOIN PAGE
+  // -----------------------------------------------------
+  Widget _joinUI(bool isDark) {
     return Scaffold(
-      backgroundColor: AppColors.background,
-      appBar: AppBar(
-        backgroundColor: AppColors.primary,
-        title: Text(widget.event?.title ?? "Join Meeting"),
-      ),
-
+      backgroundColor: isDark ? AppColors.darkBackground : AppColors.background,
+      appBar: AppBar(title: const Text("Join Meeting")),
       body: Padding(
         padding: const EdgeInsets.all(20),
         child: Column(
           children: [
-            // Neumorphic Meeting ID Field
-            Container(
-              decoration: BoxDecoration(
-                color: AppColors.background,
-                borderRadius: BorderRadius.circular(16),
-                boxShadow: const [
-                  BoxShadow(
-                    color: AppColors.lightShadow,
-                    blurRadius: 6,
-                    offset: Offset(-4, -4),
-                  ),
-                  BoxShadow(
-                    color: AppColors.darkShadow,
-                    blurRadius: 6,
-                    offset: Offset(4, 4),
-                  ),
-                ],
-              ),
-              child: TextField(
-                controller: meetingIdController,
-                decoration: InputDecoration(
-                  labelText: "Meeting ID",
-                  labelStyle: const TextStyle(color: AppColors.textLight),
-                  border: InputBorder.none,
-                  contentPadding: const EdgeInsets.all(16),
-                ),
-                onChanged: (v) => setState(() => _meetingId = v),
-              ),
-            ),
+            _neumorphicField(idCtrl, "Meeting ID", false, isDark),
+            const SizedBox(height: 16),
+            _neumorphicField(pwdCtrl, "Password", true, isDark),
+            const SizedBox(height: 32),
 
-            const SizedBox(height: 20),
-
-            // Neumorphic Password Field
-            Container(
-              decoration: BoxDecoration(
-                color: AppColors.background,
-                borderRadius: BorderRadius.circular(16),
-                boxShadow: const [
-                  BoxShadow(
-                    color: AppColors.lightShadow,
-                    blurRadius: 6,
-                    offset: Offset(-4, -4),
-                  ),
-                  BoxShadow(
-                    color: AppColors.darkShadow,
-                    blurRadius: 6,
-                    offset: Offset(4, 4),
-                  ),
-                ],
-              ),
-              child: TextField(
-                controller: passwordController,
-                obscureText: true,
-                decoration: InputDecoration(
-                  labelText: "Password",
-                  labelStyle: const TextStyle(color: AppColors.textLight),
-                  border: InputBorder.none,
-                  contentPadding: const EdgeInsets.all(16),
-                ),
-                onChanged: (v) => setState(() => _password = v),
-              ),
-            ),
-
-            const SizedBox(height: 30),
-
-            // Neumorphic Join Button (Glow + Gradient)
+            // ----------------------------------
+            // JOIN BUTTON (same as EventDetail)
+            // ----------------------------------
             SizedBox(
               width: double.infinity,
-              child: Container(
-                decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(16),
-                  gradient: LinearGradient(
-                    colors: [
-                      AppColors.primary.withOpacity(0.85),
-                      AppColors.primary,
-                    ],
+              child: ElevatedButton(
+                onPressed: () => setState(() => inMeeting = true),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: AppColors.primary,
+                  padding: const EdgeInsets.symmetric(vertical: 16),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(14),
                   ),
-                  boxShadow: [
-                    BoxShadow(
-                      color: AppColors.primary.withOpacity(0.3),
-                      blurRadius: 12,
-                      offset: const Offset(0, 4),
-                    ),
-                  ],
                 ),
-                child: ElevatedButton(
-                  onPressed: _meetingId.isNotEmpty ? _joinMeeting : null,
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.transparent,
-                    shadowColor: Colors.transparent,
-                    padding: const EdgeInsets.symmetric(vertical: 14),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(16),
-                    ),
-                  ),
-                  child: const Text(
-                    "Join Meeting",
-                    style: TextStyle(
-                      fontSize: 16,
-                      color: Colors.white,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
+                child: const Text(
+                  "Join Meeting",
+                  style: TextStyle(fontSize: 18, color: Colors.white),
                 ),
               ),
             ),
@@ -168,103 +70,199 @@ class _MockZoomMeetingPageState extends State<MockZoomMeetingPage> {
     );
   }
 
-  // -------------------------------------------------------------
-  // ZOOM MEETING UI
-  // -------------------------------------------------------------
-  Widget _zoomMeetingUI() {
-    return Scaffold(
-      backgroundColor: Colors.black,
-      appBar: _zoomTopBar(),
+  Widget _neumorphicField(
+    TextEditingController c,
+    String label,
+    bool isPassword,
+    bool isDark,
+  ) {
+    return Container(
+      decoration: BoxDecoration(
+        color: isDark ? AppColors.darkBackground : AppColors.background,
+        borderRadius: BorderRadius.circular(16),
+        boxShadow: [
+          BoxShadow(
+            color: isDark ? Colors.black54 : AppColors.lightShadow,
+            offset: const Offset(-4, -4),
+            blurRadius: 6,
+          ),
+          BoxShadow(
+            color: isDark ? Colors.black87 : AppColors.darkShadow,
+            offset: const Offset(4, 4),
+            blurRadius: 6,
+          ),
+        ],
+      ),
+      child: TextField(
+        controller: c,
+        obscureText: isPassword ? obscure : false,
+        decoration: InputDecoration(
+          border: InputBorder.none,
+          labelText: label,
+          contentPadding: const EdgeInsets.all(16),
+          suffixIcon: isPassword
+              ? IconButton(
+                  onPressed: () => setState(() => obscure = !obscure),
+                  icon: Icon(obscure ? Icons.visibility_off : Icons.visibility),
+                )
+              : null,
+        ),
+      ),
+    );
+  }
 
-      body: Column(
+  Widget _meetingUI(bool isDark) {
+    final bgColor = isDark ? AppColors.darkBackground : Colors.white;
+    final textColor = isDark ? Colors.white : Colors.black87;
+    final iconColor = isDark ? Colors.white : Colors.black87;
+
+    return Scaffold(
+      backgroundColor: bgColor,
+      body: Stack(
         children: [
-          Expanded(
-            child: Center(
-              child: Container(
-                width: double.infinity,
-                height: double.infinity,
-                color: Colors.grey[900],
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    const Icon(Icons.person, size: 110, color: Colors.white54),
-                    const SizedBox(height: 16),
-                    Text(
-                      widget.event?.title ?? "Meeting $_meetingId",
-                      style: const TextStyle(
-                        color: Colors.white70,
-                        fontSize: 18,
-                      ),
+          // -------------------------
+          // Fake camera preview
+          // -------------------------
+          Center(
+            child: Container(
+              width: double.infinity,
+              height: double.infinity,
+              color: isDark ? Colors.black54 : Colors.grey.shade300,
+              child: camOn
+                  ? Icon(
+                      Icons.person,
+                      size: 120,
+                      color: isDark ? Colors.white24 : Colors.black26,
+                    )
+                  : Icon(
+                      Icons.videocam_off,
+                      size: 120,
+                      color: isDark ? Colors.white30 : Colors.black38,
                     ),
-                  ],
-                ),
-              ),
             ),
           ),
 
-          // BOTTOM ZOOM TOOLBAR
-          _zoomBottomToolbar(),
-          const SizedBox(height: 20),
-        ],
-      ),
-    );
-  }
+          // -------------------------
+          // TOP BAR
+          // -------------------------
+          Positioned(
+            top: 40,
+            left: 20,
+            right: 20,
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text(
+                  "Meeting",
+                  style: TextStyle(
+                    color: textColor,
+                    fontSize: 20,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
 
-  // -------------------------------------------------------------
-  // TOP BAR LIKE ZOOM
-  // -------------------------------------------------------------
-  AppBar _zoomTopBar() {
-    return AppBar(
-      backgroundColor: Colors.black,
-      elevation: 0,
-      title: Text(
-        "Meeting ID: $_meetingId",
-        style: const TextStyle(fontSize: 16),
-      ),
-      actions: [
-        TextButton(
-          onPressed: _leaveMeeting,
-          child: const Text(
-            "Leave",
-            style: TextStyle(color: Colors.red, fontSize: 16),
+                GestureDetector(
+                  onTap: () => setState(() => inMeeting = false),
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 14,
+                      vertical: 8,
+                    ),
+                    decoration: BoxDecoration(
+                      color: Colors.redAccent,
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    child: const Text(
+                      "Leave",
+                      style: TextStyle(color: Colors.white, fontSize: 16),
+                    ),
+                  ),
+                ),
+              ],
+            ),
           ),
-        ),
-      ],
-    );
-  }
 
-  // -------------------------------------------------------------
-  // ZOOM BOTTOM TOOLBAR
-  // -------------------------------------------------------------
-  Widget _zoomBottomToolbar() {
-    return Container(
-      padding: const EdgeInsets.symmetric(vertical: 12),
-      color: Colors.black87,
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-        children: [
-          _zoomButton(Icons.mic_off, "Mute"),
-          _zoomButton(Icons.videocam_off, "Stop Video"),
-          _zoomButton(Icons.share, "Share"),
-          _zoomButton(Icons.people, "Participants"),
-          _zoomButton(Icons.more_horiz, "More"),
+          // -------------------------
+          // BOTTOM CONTROL BAR
+          // -------------------------
+          Positioned(
+            bottom: 30,
+            left: 0,
+            right: 0,
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+              children: [
+                _controlButton(
+                  icon: micOn ? Icons.mic : Icons.mic_off,
+                  label: "Mute",
+                  active: micOn,
+                  isDark: isDark,
+                  onTap: () => setState(() => micOn = !micOn),
+                ),
+                _controlButton(
+                  icon: camOn ? Icons.videocam : Icons.videocam_off,
+                  label: "Video",
+                  active: camOn,
+                  isDark: isDark,
+                  onTap: () => setState(() => camOn = !camOn),
+                ),
+                _controlButton(
+                  icon: speakerOn ? Icons.volume_up : Icons.volume_off,
+                  label: "Speaker",
+                  active: speakerOn,
+                  isDark: isDark,
+                  onTap: () => setState(() => speakerOn = !speakerOn),
+                ),
+                _controlButton(
+                  icon: Icons.cameraswitch,
+                  label: "Switch",
+                  active: true,
+                  isDark: isDark,
+                  onTap: () {},
+                ),
+              ],
+            ),
+          ),
         ],
       ),
     );
   }
 
-  // Generic Zoom button
-  Widget _zoomButton(IconData icon, String label) {
-    return Column(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        Icon(icon, color: Colors.white, size: 28),
-        const SizedBox(height: 4),
-        Text(
-          label,
-          style: const TextStyle(color: Colors.white70, fontSize: 12),
-        ),
-      ],
+  Widget _controlButton({
+    required IconData icon,
+    required String label,
+    required bool active,
+    required bool isDark,
+    required VoidCallback onTap,
+  }) {
+    final activeBg = isDark ? Colors.white : Colors.black;
+    final inactiveBg = isDark
+        ? Colors.white.withOpacity(0.15)
+        : Colors.black.withOpacity(0.1);
+
+    final activeIcon = isDark ? Colors.black : Colors.white;
+    final inactiveIcon = isDark ? Colors.white : Colors.black87;
+
+    final textColor = isDark ? Colors.white70 : Colors.black54;
+
+    return GestureDetector(
+      onTap: onTap,
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          CircleAvatar(
+            radius: 28,
+            backgroundColor: active ? activeBg : inactiveBg,
+            child: Icon(
+              icon,
+              size: 28,
+              color: active ? activeIcon : inactiveIcon,
+            ),
+          ),
+          const SizedBox(height: 6),
+          Text(label, style: TextStyle(color: textColor)),
+        ],
+      ),
     );
   }
 }

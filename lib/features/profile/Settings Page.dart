@@ -1,70 +1,76 @@
 import 'package:coach_hub/core/theme/dark_mode.dart';
+import 'package:coach_hub/features/profile/HelpSupportPage.dart';
+import 'package:coach_hub/features/profile/PrivacyPage.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../core/theme/app_colors.dart';
+import '../../core/theme/neumorphic_box.dart';
 
-class SettingsPage extends StatelessWidget {
+class SettingsPage extends StatefulWidget {
   const SettingsPage({super.key});
 
   @override
-  Widget build(BuildContext context) {
-    final themeProvider = Provider.of<ThemeProvider>(context);
+  State<SettingsPage> createState() => _SettingsPageState();
+}
 
+class _SettingsPageState extends State<SettingsPage> {
+  bool notificationsEnabled = false;
+  @override
+  Widget build(BuildContext context) {
+    final isDark = context.watch<ThemeProvider>().isDarkMode;
     return Scaffold(
-      backgroundColor: AppColors.background,
+      backgroundColor: isDark ? AppColors.darkBackground : AppColors.background,
       appBar: AppBar(
-        title: const Text("Settings"),
         backgroundColor: AppColors.primary,
-        elevation: 0,
+        title: Text(
+          "Settings",
+          style: TextStyle(color: isDark ? AppColors.darkText : Colors.white),
+        ),
       ),
       body: ListView(
         padding: const EdgeInsets.all(16),
         children: [
-          const Padding(
-            padding: EdgeInsets.only(left: 5, bottom: 12),
+          Padding(
+            padding: const EdgeInsets.only(left: 5, bottom: 12),
             child: Text(
               "App Settings",
               style: TextStyle(
                 fontSize: 22,
                 fontWeight: FontWeight.bold,
-                color: AppColors.textDark,
+                color: isDark ? AppColors.darkText : AppColors.textDark,
               ),
             ),
           ),
-
-          // ----------------------------------------------------
-          // 🔵 NEUMORPHIC CARD — Notification + Dark Mode
-          // ----------------------------------------------------
           _neumorphicCard(
+            isDark: isDark,
             child: Column(
               children: [
                 _switchTile(
                   icon: Icons.notifications_none,
                   title: "Enable Notifications",
-                  subtitle: "Get notified about new events",
-                  value: true,
-                  onChanged: (val) {},
+                  subtitle: "Get notified about events",
+                  value: notificationsEnabled,
+                  onChanged: (val) {
+                    setState(() => notificationsEnabled = val);
+                  },
+                  isDark: isDark,
                 ),
-                _tileDivider(),
+                _tileDivider(isDark),
                 _switchTile(
                   icon: Icons.dark_mode_outlined,
                   title: "Dark Mode",
-                  subtitle: themeProvider.isDarkMode
-                      ? "Dark mode is ON"
-                      : "Dark mode is OFF",
-                  value: themeProvider.isDarkMode,
-                  onChanged: (val) => themeProvider.toggleTheme(val),
+                  subtitle: isDark ? "Dark mode is ON" : "Dark mode is OFF",
+                  value: isDark,
+                  onChanged: (val) =>
+                      context.read<ThemeProvider>().toggleTheme(val),
+                  isDark: isDark,
                 ),
               ],
             ),
           ),
-
           const SizedBox(height: 22),
-
-          // ----------------------------------------------------
-          // 🔵 NEUMORPHIC CARD — Other settings
-          // ----------------------------------------------------
           _neumorphicCard(
+            isDark: isDark,
             child: Column(
               children: [
                 _settingsTile(
@@ -72,18 +78,35 @@ class SettingsPage extends StatelessWidget {
                   title: "Language",
                   subtitle: "English",
                   onTap: () {},
+                  isDark: isDark,
                 ),
-                _tileDivider(),
+                _tileDivider(isDark),
                 _settingsTile(
                   icon: Icons.lock_outline,
                   title: "Privacy",
-                  onTap: () {},
+                  subtitle: "Manage your privacy & data",
+                  onTap: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(builder: (_) => const PrivacyPage()),
+                    );
+                  },
+                  isDark: isDark,
                 ),
-                _tileDivider(),
+                _tileDivider(isDark),
                 _settingsTile(
                   icon: Icons.help_outline,
                   title: "Help & Support",
-                  onTap: () {},
+                  subtitle: "Get help or contact support",
+                  onTap: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (_) => const HelpSupportPage(),
+                      ),
+                    );
+                  },
+                  isDark: isDark,
                 ),
               ],
             ),
@@ -93,53 +116,37 @@ class SettingsPage extends StatelessWidget {
     );
   }
 
-  // ----------------------------------------------------
-  // REUSABLE NEUMORPHIC CARD (same as profile)
-  // ----------------------------------------------------
-  Widget _neumorphicCard({required Widget child}) {
-    return Container(
-      padding: const EdgeInsets.symmetric(vertical: 6),
-      decoration: BoxDecoration(
-        color: AppColors.background,
-        borderRadius: BorderRadius.circular(22),
-        boxShadow: const [
-          BoxShadow(
-            color: AppColors.lightShadow,
-            blurRadius: 6,
-            offset: Offset(-4, -4),
-          ),
-          BoxShadow(
-            color: AppColors.darkShadow,
-            blurRadius: 6,
-            offset: Offset(4, 4),
-          ),
-        ],
-      ),
-      child: child,
-    );
-  }
+  Widget _neumorphicCard({required Widget child, required bool isDark}) =>
+      Container(
+        padding: const EdgeInsets.symmetric(vertical: 6),
+        decoration: neumorphicBox(isDark),
+        child: child,
+      );
 
-  // ----------------------------------------------------
-  // SWITCH TILE (NOTIFICATIONS / DARK MODE)
-  // ----------------------------------------------------
   Widget _switchTile({
     required IconData icon,
     required String title,
     required bool value,
     required ValueChanged<bool> onChanged,
+    required bool isDark,
     String? subtitle,
   }) {
     return ListTile(
-      leading: _circleIcon(icon),
+      leading: _circleIcon(icon, isDark),
       title: Text(
         title,
-        style: const TextStyle(
+        style: TextStyle(
           fontWeight: FontWeight.bold,
-          color: AppColors.textDark,
+          color: isDark ? AppColors.darkText : AppColors.textDark,
         ),
       ),
       subtitle: subtitle != null
-          ? Text(subtitle, style: const TextStyle(color: AppColors.textLight))
+          ? Text(
+              subtitle,
+              style: TextStyle(
+                color: isDark ? AppColors.darkSubText : AppColors.textLight,
+              ),
+            )
           : null,
       trailing: Switch(
         value: value,
@@ -149,63 +156,71 @@ class SettingsPage extends StatelessWidget {
     );
   }
 
-  // ----------------------------------------------------
-  // SETTINGS TILE (language, help, privacy)
-  // ----------------------------------------------------
   Widget _settingsTile({
     required IconData icon,
     required String title,
-    String? subtitle,
     required VoidCallback onTap,
+    required bool isDark,
+    String? subtitle,
   }) {
     return ListTile(
-      leading: _circleIcon(icon),
+      leading: _circleIcon(icon, isDark),
       title: Text(
         title,
-        style: const TextStyle(
+        style: TextStyle(
           fontSize: 16,
           fontWeight: FontWeight.bold,
-          color: AppColors.textDark,
+          color: isDark ? AppColors.darkText : AppColors.textDark,
         ),
       ),
       subtitle: subtitle != null
-          ? Text(subtitle, style: const TextStyle(color: AppColors.textLight))
+          ? Text(
+              subtitle,
+              style: TextStyle(
+                color: isDark ? AppColors.darkSubText : AppColors.textLight,
+              ),
+            )
           : null,
-      trailing: const Icon(Icons.arrow_forward_ios, size: 16),
+      trailing: Icon(
+        Icons.arrow_forward_ios,
+        size: 16,
+        color: isDark ? AppColors.darkSubText : AppColors.textLight,
+      ),
       onTap: onTap,
     );
   }
 
-  // ----------------------------------------------------
-  // NEUMORPHIC LEADING ICON
-  // ----------------------------------------------------
-  Widget _circleIcon(IconData icon) {
+  Widget _circleIcon(IconData icon, bool isDark) {
     return Container(
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
-        color: AppColors.background,
+        color: isDark ? AppColors.darkCard : AppColors.background,
         shape: BoxShape.circle,
-        boxShadow: const [
+        boxShadow: [
           BoxShadow(
-            color: AppColors.lightShadow,
+            color: isDark ? AppColors.darkLightShadow : AppColors.lightShadow,
             blurRadius: 5,
-            offset: Offset(-3, -3),
+            offset: const Offset(-3, -3),
           ),
           BoxShadow(
-            color: AppColors.darkShadow,
+            color: isDark ? AppColors.darkDarkShadow : AppColors.darkShadow,
             blurRadius: 5,
-            offset: Offset(3, 3),
+            offset: const Offset(3, 3),
           ),
         ],
       ),
-      child: Icon(icon, color: AppColors.primary, size: 22),
+      child: Icon(icon, color: AppColors.primary),
     );
   }
 
-  Widget _tileDivider() {
-    return const Padding(
-      padding: EdgeInsets.symmetric(horizontal: 18),
-      child: Divider(height: 1, thickness: 0.7),
-    );
-  }
+  Widget _tileDivider(bool isDark) => Padding(
+    padding: const EdgeInsets.symmetric(horizontal: 18),
+    child: Divider(
+      height: 1,
+      thickness: 1,
+      color: isDark
+          ? Colors.white.withOpacity(0.20) // visible light line
+          : Colors.black.withOpacity(0.15), // visible dark line
+    ),
+  );
 }

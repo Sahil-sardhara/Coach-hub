@@ -1,9 +1,7 @@
 import 'package:coach_hub/features/zoom/mock_zoom_meeting_page.dart';
 import 'package:coach_hub/features/profile/profile_page.dart';
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
 import '../../core/theme/app_colors.dart';
-import '../../core/theme/dark_mode.dart';
 import 'package:coach_hub/model/Event_Model.dart';
 import 'EventDetailPage.dart';
 
@@ -23,21 +21,19 @@ class _HomePageState extends State<HomePage> {
       title: "Startup Pitch Day & Networking Mixer",
       time: "10:00 AM, Oct 28 2025",
       description:
-          "**Relive the excitement!** This highly-anticipated annual event featured 15 top student-led startups annual event featured 15 top student-led startups annual event featured 15 top student-led startups",
+          "**Relive the excitement!** This annual event featured 15 top student-led startups...",
       imageUrl: "https://picsum.photos/400/200?random=4",
     ),
     Event(
       title: "AI Trends & Ethical Governance Talk (LIVE)",
       time: "4:30 PM, Nov 14 2025",
-      description:
-          "**Happening now!** Join leading expert Dr. Ben Carter Join leading expert Dr. Ben Carter Join leading expert Dr. Ben Carter Join leading expert Dr. Ben Carter",
+      description: "**Happening now!** Join leading expert Dr. Ben Carter...",
       imageUrl: "https://picsum.photos/400/200?random=5",
     ),
     Event(
-      title: "Tech Seminar: Next-Gen Flutter & Flow Development",
+      title: "Tech Seminar: Next-Gen Flutter Development",
       time: "3 PM, Nov 15 2025",
-      description:
-          "Discover the future of cross-platform development the future of cross-platform development the future of cross-platform development the future of cross-platform development",
+      description: "Discover the future of cross-platform development...",
       imageUrl: "https://picsum.photos/400/200?random=1",
     ),
   ];
@@ -51,6 +47,7 @@ class _HomePageState extends State<HomePage> {
     displayedEvents = List.from(allEvents);
   }
 
+  // FILTER EVENTS
   void _filterEvents(String query) {
     if (query.length < 2) {
       setState(() => displayedEvents = List.from(allEvents));
@@ -66,26 +63,25 @@ class _HomePageState extends State<HomePage> {
     });
   }
 
-  Widget _buildBody() {
+  // BODY
+  Widget _buildBody(BuildContext context) {
     switch (_currentIndex) {
       case 0:
-        return _eventsList();
+        return _eventsList(context);
       case 1:
         return MockZoomMeetingPage();
       case 2:
         return ProfilePage();
       default:
-        return _eventsList();
+        return _eventsList(context);
     }
   }
 
-  Widget _eventsList() {
-    final isDark = Provider.of<ThemeProvider>(context).isDarkMode;
-
+  // EVENTS LIST
+  Widget _eventsList(BuildContext context) {
     return Column(
       children: [
         Padding(padding: const EdgeInsets.all(16), child: _buildSearchField()),
-
         Expanded(
           child: ListView.builder(
             padding: const EdgeInsets.only(bottom: 20),
@@ -99,22 +95,24 @@ class _HomePageState extends State<HomePage> {
     );
   }
 
-  // SEARCH FIELD (Neumorphic)
+  // SEARCH FIELD (NEUMORPHIC DARK + LIGHT)
   Widget _buildSearchField() {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+
     return Container(
       decoration: BoxDecoration(
-        color: AppColors.background,
+        color: isDark ? AppColors.darkBackground : AppColors.background,
         borderRadius: BorderRadius.circular(18),
-        boxShadow: const [
+        boxShadow: [
           BoxShadow(
-            color: AppColors.lightShadow,
+            color: isDark ? AppColors.darkLightShadow : AppColors.lightShadow,
             blurRadius: 6,
-            offset: Offset(-4, -4),
+            offset: const Offset(-4, -4),
           ),
           BoxShadow(
-            color: AppColors.darkShadow,
+            color: isDark ? AppColors.darkDarkShadow : AppColors.darkShadow,
             blurRadius: 6,
-            offset: Offset(4, 4),
+            offset: const Offset(4, 4),
           ),
         ],
       ),
@@ -123,21 +121,30 @@ class _HomePageState extends State<HomePage> {
         onChanged: _filterEvents,
         decoration: InputDecoration(
           hintText: "Search events...",
-          hintStyle: const TextStyle(color: AppColors.textLight),
-          prefixIcon: const Icon(Icons.search, color: AppColors.textLight),
+          hintStyle: TextStyle(
+            color: isDark ? AppColors.darkSubText : AppColors.textLight,
+          ),
+          prefixIcon: Icon(
+            Icons.search,
+            color: isDark ? AppColors.darkSubText : AppColors.textLight,
+          ),
           border: InputBorder.none,
           contentPadding: const EdgeInsets.symmetric(
             vertical: 16,
             horizontal: 18,
           ),
         ),
-        style: const TextStyle(color: AppColors.textDark),
+        style: TextStyle(
+          color: isDark ? AppColors.darkText : AppColors.textDark,
+        ),
       ),
     );
   }
 
-  // EVENT CARD (Neumorphic)
+  // EVENT CARD (NEUMORPHIC)
   Widget _eventCard(Event event) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+
     return GestureDetector(
       onTap: () {
         Navigator.push(
@@ -149,19 +156,17 @@ class _HomePageState extends State<HomePage> {
         margin: const EdgeInsets.symmetric(horizontal: 18, vertical: 12),
         padding: const EdgeInsets.all(16),
         decoration: BoxDecoration(
-          color: AppColors.background, // same as profile
+          color: isDark ? AppColors.darkCard : AppColors.background,
           borderRadius: BorderRadius.circular(22),
-          boxShadow: const [
-            // Light top-left shadow
+          boxShadow: [
             BoxShadow(
-              color: AppColors.lightShadow,
-              offset: Offset(-4, -4),
+              color: isDark ? AppColors.darkLightShadow : AppColors.lightShadow,
+              offset: const Offset(-4, -4),
               blurRadius: 8,
             ),
-            // Dark bottom-right shadow
             BoxShadow(
-              color: AppColors.darkShadow,
-              offset: Offset(4, 4),
+              color: isDark ? AppColors.darkDarkShadow : AppColors.darkShadow,
+              offset: const Offset(4, 4),
               blurRadius: 8,
             ),
           ],
@@ -170,7 +175,7 @@ class _HomePageState extends State<HomePage> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Event Image
+            // IMAGE
             ClipRRect(
               borderRadius: BorderRadius.circular(18),
               child: Image.network(
@@ -183,51 +188,53 @@ class _HomePageState extends State<HomePage> {
 
             const SizedBox(height: 16),
 
-            // Title
+            // TITLE
             Text(
               event.title,
-              style: const TextStyle(
+              style: TextStyle(
                 fontSize: 18,
                 fontWeight: FontWeight.bold,
-                color: AppColors.textDark,
+                color: isDark ? AppColors.darkText : AppColors.textDark,
               ),
             ),
 
             const SizedBox(height: 6),
 
-            // Time + Date
+            // TIME
             Row(
               children: [
-                const Icon(
+                Icon(
                   Icons.access_time,
                   size: 16,
-                  color: AppColors.textLight,
+                  color: isDark ? AppColors.darkSubText : AppColors.textLight,
                 ),
                 const SizedBox(width: 6),
                 Text(
                   event.time,
-                  style: const TextStyle(color: AppColors.textLight),
+                  style: TextStyle(
+                    color: isDark ? AppColors.darkSubText : AppColors.textLight,
+                  ),
                 ),
               ],
             ),
 
             const SizedBox(height: 8),
 
-            // Description
+            // DESCRIPTION
             Text(
               event.description,
               maxLines: 8,
               overflow: TextOverflow.ellipsis,
-              style: const TextStyle(
+              style: TextStyle(
                 fontSize: 14,
                 height: 1.4,
-                color: AppColors.textLight,
+                color: isDark ? AppColors.darkSubText : AppColors.textLight,
               ),
             ),
 
             const SizedBox(height: 16),
 
-            // Button
+            // BUTTON
             SizedBox(
               width: double.infinity,
               child: Container(
@@ -282,15 +289,18 @@ class _HomePageState extends State<HomePage> {
     );
   }
 
+  // MAIN BUILD
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+
     return Scaffold(
-      backgroundColor: AppColors.background,
+      backgroundColor: isDark ? AppColors.darkBackground : AppColors.background,
       appBar: AppBar(
         backgroundColor: AppColors.primary,
         title: Text(appBarTitles[_currentIndex]),
       ),
-      body: _buildBody(),
+      body: _buildBody(context),
     );
   }
 }

@@ -1,122 +1,72 @@
+import 'package:coach_hub/core/theme/dark_mode.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import '../../core/theme/app_colors.dart';
+import '../../core/theme/neumorphic_box.dart';
 
 class AboutPage extends StatelessWidget {
   const AboutPage({super.key});
-
   @override
   Widget build(BuildContext context) {
+    final isDark = context.watch<ThemeProvider>().isDarkMode;
     return Scaffold(
-      backgroundColor: AppColors.background,
+      backgroundColor: isDark ? AppColors.darkBackground : AppColors.background,
       appBar: AppBar(
         title: const Text("About"),
         backgroundColor: AppColors.primary,
       ),
-      body: SingleChildScrollView(
+      body: Padding(
         padding: const EdgeInsets.all(16),
         child: Column(
           children: [
-            _settingsTile(
-              icon: Icons.info_outline,
-              title: "About This App",
-              subtitle:
-                  "This is a mock educational app created for demonstration purposes, showcasing events, profiles, settings and Zoom meeting UI.",
+            _tile(
+              Icons.info_outline,
+              "About App",
+              "This app showcases events, profile and Zoom UI.",
+              isDark,
             ),
-            const SizedBox(height: 15),
-
-            _settingsTile(
-              icon: Icons.verified,
-              title: "Version",
-              subtitle: "1.0.0",
-            ),
-            const SizedBox(height: 15),
-
-            _settingsTile(
-              icon: Icons.email_outlined,
-              title: "Contact",
-              subtitle: "support@test.com\nPhone: +123 456 7890",
-            ),
+            const SizedBox(height: 12),
+            _tile(Icons.verified, "Version", "1.0.0", isDark),
+            const SizedBox(height: 12),
+            _tile(Icons.email, "Contact", "support@test.com", isDark),
           ],
         ),
       ),
     );
   }
 
-  // -------------------------------------------------------
-  //  PROFILE-STYLE NEUMORPHIC TILE
-  // -------------------------------------------------------
-  Widget _settingsTile({
-    required IconData icon,
-    required String title,
-    required String subtitle,
-  }) {
+  Widget _tile(IconData icon, String title, String subtitle, bool isDark) {
     return Container(
-      padding: const EdgeInsets.all(18),
-      decoration: BoxDecoration(
-        color: AppColors.background,
-        borderRadius: BorderRadius.circular(20),
-        boxShadow: const [
-          // Light Shadow (top-left)
-          BoxShadow(
-            color: AppColors.lightShadow,
-            blurRadius: 6,
-            offset: Offset(-4, -4),
-          ),
-
-          // Dark Shadow (bottom-right)
-          BoxShadow(
-            color: AppColors.darkShadow,
-            blurRadius: 6,
-            offset: Offset(4, 4),
-          ),
-        ],
-      ),
+      padding: const EdgeInsets.all(16),
+      decoration: neumorphicBox(isDark),
       child: Row(
         children: [
-          // Leading Icon Circle
           Container(
             padding: const EdgeInsets.all(12),
             decoration: BoxDecoration(
-              color: AppColors.background,
               shape: BoxShape.circle,
-              boxShadow: const [
-                BoxShadow(
-                  color: AppColors.lightShadow,
-                  blurRadius: 6,
-                  offset: Offset(-3, -3),
-                ),
-                BoxShadow(
-                  color: AppColors.darkShadow,
-                  blurRadius: 6,
-                  offset: Offset(3, 3),
-                ),
-              ],
+              color: isDark ? AppColors.darkBackground : AppColors.background,
             ),
             child: Icon(icon, color: AppColors.primary),
           ),
-
-          const SizedBox(width: 18),
-
-          // Text Content
+          const SizedBox(width: 16),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
                   title,
-                  style: const TextStyle(
+                  style: TextStyle(
                     fontSize: 17,
                     fontWeight: FontWeight.bold,
-                    color: AppColors.textDark,
+                    color: isDark ? AppColors.darkText : AppColors.textDark,
                   ),
                 ),
                 const SizedBox(height: 4),
                 Text(
                   subtitle,
-                  style: const TextStyle(
-                    fontSize: 14,
-                    color: AppColors.textLight,
-                    height: 1.4,
+                  style: TextStyle(
+                    color: isDark ? AppColors.darkSubText : AppColors.textLight,
                   ),
                 ),
               ],

@@ -1,9 +1,11 @@
-import 'package:coach_hub/data/mock_users.dart' show MockUsers;
-import 'package:coach_hub/features/home/home_page.dart';
-import 'package:flutter/gestures.dart';
+import 'package:coach_hub/core/theme/dark_mode.dart';
+import 'package:coach_hub/data/mock_users.dart';
+import 'package:coach_hub/features/navigation/bottom_navbar.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:provider/provider.dart';
 import '../../core/theme/app_colors.dart';
+import '../../core/theme/neumorphic_box.dart';
 
 class LoginPage extends StatefulWidget {
   const LoginPage({super.key});
@@ -14,7 +16,7 @@ class LoginPage extends StatefulWidget {
 
 class _LoginPageState extends State<LoginPage> {
   bool isEmail = true;
-  bool isPasswordVisible = false; // << Add this
+  bool isPasswordVisible = false;
 
   final emailController = TextEditingController();
   final phoneController = TextEditingController();
@@ -22,8 +24,10 @@ class _LoginPageState extends State<LoginPage> {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Provider.of<ThemeProvider>(context).isDarkMode;
+
     return Scaffold(
-      backgroundColor: AppColors.background,
+      backgroundColor: isDark ? AppColors.darkBackground : AppColors.background,
       appBar: AppBar(
         title: const Text("Student Login"),
         backgroundColor: AppColors.primary,
@@ -34,11 +38,8 @@ class _LoginPageState extends State<LoginPage> {
           padding: const EdgeInsets.symmetric(horizontal: 24),
           child: Column(
             children: [
-              Card(
-                elevation: 8,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(20),
-                ),
+              Container(
+                decoration: neumorphicBox(isDark),
                 child: Padding(
                   padding: const EdgeInsets.symmetric(
                     horizontal: 24,
@@ -46,10 +47,14 @@ class _LoginPageState extends State<LoginPage> {
                   ),
                   child: Column(
                     children: [
-                      // Toggle Email / Phone (unchanged)
+                      // ----------------------------------------------------
+                      // EMAIL / PHONE TOGGLE
+                      // ----------------------------------------------------
                       Container(
                         decoration: BoxDecoration(
-                          color: AppColors.background,
+                          color: isDark
+                              ? AppColors.darkBackground
+                              : AppColors.background,
                           borderRadius: BorderRadius.circular(50),
                           border: Border.all(
                             color: AppColors.primary.withOpacity(0.4),
@@ -117,61 +122,100 @@ class _LoginPageState extends State<LoginPage> {
 
                       const SizedBox(height: 30),
 
-                      // Email or Phone input
-                      TextField(
-                        controller: isEmail ? emailController : phoneController,
-                        keyboardType: isEmail
-                            ? TextInputType.emailAddress
-                            : TextInputType.number, // number keyboard for phone
-                        inputFormatters: isEmail
-                            ? [] // no restrictions for email
-                            : [
-                                FilteringTextInputFormatter
-                                    .digitsOnly, // only digits
-                                LengthLimitingTextInputFormatter(
-                                  10,
-                                ), // max 10 digits
-                              ],
-                        decoration: InputDecoration(
-                          labelText: isEmail ? "Email Address" : "Phone Number",
-                          border: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(15),
+                      // ----------------------------------------------------
+                      // EMAIL / PHONE INPUT (NEUMORPHIC)
+                      // ----------------------------------------------------
+                      Container(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 18,
+                          vertical: 4,
+                        ),
+                        decoration: neumorphicBox(isDark),
+                        child: TextField(
+                          controller: isEmail
+                              ? emailController
+                              : phoneController,
+                          keyboardType: isEmail
+                              ? TextInputType.emailAddress
+                              : TextInputType.number,
+                          inputFormatters: isEmail
+                              ? []
+                              : [
+                                  FilteringTextInputFormatter.digitsOnly,
+                                  LengthLimitingTextInputFormatter(10),
+                                ],
+                          style: TextStyle(
+                            color: isDark
+                                ? AppColors.darkText
+                                : AppColors.textDark,
                           ),
-                          prefixIcon: Icon(isEmail ? Icons.email : Icons.phone),
+                          decoration: InputDecoration(
+                            labelText: isEmail
+                                ? "Email Address"
+                                : "Phone Number",
+                            labelStyle: TextStyle(
+                              color: isDark
+                                  ? AppColors.darkSubText
+                                  : AppColors.textLight,
+                            ),
+                            border: InputBorder.none,
+                            prefixIcon: Icon(
+                              isEmail ? Icons.email : Icons.phone,
+                            ),
+                          ),
                         ),
                       ),
 
                       const SizedBox(height: 20),
 
-                      // Password Field with Eye button
-                      TextField(
-                        controller: passwordController,
-                        obscureText: !isPasswordVisible, // toggle obscureText
-                        decoration: InputDecoration(
-                          labelText: "Password",
-                          border: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(15),
+                      // ----------------------------------------------------
+                      // PASSWORD FIELD (NEUMORPHIC)
+                      // ----------------------------------------------------
+                      Container(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 18,
+                          vertical: 4,
+                        ),
+                        decoration: neumorphicBox(isDark),
+                        child: TextField(
+                          controller: passwordController,
+                          obscureText: !isPasswordVisible,
+                          style: TextStyle(
+                            color: isDark
+                                ? AppColors.darkText
+                                : AppColors.textDark,
                           ),
-                          prefixIcon: const Icon(Icons.lock),
-                          suffixIcon: IconButton(
-                            icon: Icon(
-                              isPasswordVisible
-                                  ? Icons.visibility
-                                  : Icons.visibility_off,
-                              color: AppColors.textLight,
+                          decoration: InputDecoration(
+                            labelText: "Password",
+                            border: InputBorder.none,
+                            labelStyle: TextStyle(
+                              color: isDark
+                                  ? AppColors.darkSubText
+                                  : AppColors.textLight,
                             ),
-                            onPressed: () {
-                              setState(() {
-                                isPasswordVisible = !isPasswordVisible;
-                              });
-                            },
+                            prefixIcon: const Icon(Icons.lock),
+                            suffixIcon: IconButton(
+                              icon: Icon(
+                                isPasswordVisible
+                                    ? Icons.visibility
+                                    : Icons.visibility_off,
+                                color: AppColors.textLight,
+                              ),
+                              onPressed: () {
+                                setState(
+                                  () => isPasswordVisible = !isPasswordVisible,
+                                );
+                              },
+                            ),
                           ),
                         ),
                       ),
 
                       const SizedBox(height: 30),
 
-                      // Login Button
+                      // ----------------------------------------------------
+                      // LOGIN BUTTON
+                      // ----------------------------------------------------
                       SizedBox(
                         width: double.infinity,
                         child: ElevatedButton(
@@ -181,7 +225,6 @@ class _LoginPageState extends State<LoginPage> {
                                 : phoneController.text.trim();
                             String password = passwordController.text.trim();
 
-                            // Basic validation
                             if (input.isEmpty || password.isEmpty) {
                               ScaffoldMessenger.of(context).showSnackBar(
                                 const SnackBar(
@@ -204,37 +247,32 @@ class _LoginPageState extends State<LoginPage> {
                               return;
                             }
 
-                            // Check credentials from MockUsers
-                            bool isValid = false;
-
-                            for (var user in MockUsers.users) {
+                            bool isValid = MockUsers.users.any((user) {
                               if (isEmail &&
-                                  user.containsKey("email") &&
                                   user["email"] == input &&
                                   user["password"] == password) {
-                                isValid = true;
-                                break;
-                              } else if (!isEmail &&
-                                  user.containsKey("phone") &&
+                                return true;
+                              }
+                              if (!isEmail &&
                                   user["phone"] == input &&
                                   user["password"] == password) {
-                                isValid = true;
-                                break;
+                                return true;
                               }
-                            }
+                              return false;
+                            });
 
                             if (isValid) {
-                              // Navigate to HomePage
                               Navigator.pushReplacement(
                                 context,
-                                MaterialPageRoute(builder: (_) => HomePage()),
+                                MaterialPageRoute(
+                                  builder: (_) => BottomNavBar(), // FIXED
+                                ),
                               );
                             } else {
-                              // Invalid credentials
                               ScaffoldMessenger.of(context).showSnackBar(
                                 const SnackBar(
                                   content: Text(
-                                    "Invalid credentials. Please try again.",
+                                    "Invalid credentials. Try again.",
                                   ),
                                   backgroundColor: Colors.red,
                                 ),
@@ -264,9 +302,6 @@ class _LoginPageState extends State<LoginPage> {
               ),
 
               const SizedBox(height: 25),
-
-              // Sign Up Rich Text
-              //
             ],
           ),
         ),
