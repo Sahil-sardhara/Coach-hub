@@ -1,3 +1,4 @@
+import 'package:coach_hub/core/theme/app_colors.dart';
 import 'package:coach_hub/core/theme/dark_mode.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
@@ -7,7 +8,8 @@ import '../profile/profile_page.dart';
 import 'CustomBottomNavBar.dart';
 
 class BottomNavBar extends StatefulWidget {
-  const BottomNavBar({super.key});
+  final bool showLoginSuccess;
+  const BottomNavBar({super.key, this.showLoginSuccess = false});
 
   @override
   State<BottomNavBar> createState() => _BottomNavBarState();
@@ -15,6 +17,22 @@ class BottomNavBar extends StatefulWidget {
 
 class _BottomNavBarState extends State<BottomNavBar> {
   int index = 0;
+
+  @override
+  void initState() {
+    super.initState();
+
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (widget.showLoginSuccess) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text("Login Successful!"),
+            backgroundColor: AppColors.primary,
+          ),
+        );
+      }
+    });
+  }
 
   @override
   Widget build(BuildContext context) {

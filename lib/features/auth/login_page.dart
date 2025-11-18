@@ -2,310 +2,262 @@ import 'package:coach_hub/core/theme/dark_mode.dart';
 import 'package:coach_hub/data/mock_users.dart';
 import 'package:coach_hub/features/navigation/bottom_navbar.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 import '../../core/theme/app_colors.dart';
 import '../../core/theme/neumorphic_box.dart';
 
 class LoginPage extends StatefulWidget {
-  const LoginPage({super.key});
+  final bool showLogoutSuccess;
+  const LoginPage({super.key, this.showLogoutSuccess = false});
 
   @override
   State<LoginPage> createState() => _LoginPageState();
 }
 
 class _LoginPageState extends State<LoginPage> {
-  bool isEmail = true;
   bool isPasswordVisible = false;
 
   final emailController = TextEditingController();
-  final phoneController = TextEditingController();
   final passwordController = TextEditingController();
 
   @override
+  void initState() {
+    super.initState();
+
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (widget.showLogoutSuccess) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text("Logout Successful!"),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+    });
+  }
+
+  @override
   Widget build(BuildContext context) {
-    final isDark = Provider.of<ThemeProvider>(context).isDarkMode;
+    final isDark = context.watch<ThemeProvider>().isDarkMode;
 
     return Scaffold(
       backgroundColor: isDark ? AppColors.darkBackground : AppColors.background,
-      appBar: AppBar(
-        title: const Text("Student Login"),
-        backgroundColor: AppColors.primary,
-        elevation: 0,
-      ),
-      body: Center(
-        child: SingleChildScrollView(
-          padding: const EdgeInsets.symmetric(horizontal: 24),
-          child: Column(
-            children: [
-              Container(
-                decoration: neumorphicBox(isDark),
-                child: Padding(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 24,
-                    vertical: 30,
-                  ),
-                  child: Column(
-                    children: [
-                      // ----------------------------------------------------
-                      // EMAIL / PHONE TOGGLE
-                      // ----------------------------------------------------
-                      Container(
-                        decoration: BoxDecoration(
-                          color: isDark
-                              ? AppColors.darkBackground
-                              : AppColors.background,
-                          borderRadius: BorderRadius.circular(50),
-                          border: Border.all(
-                            color: AppColors.primary.withOpacity(0.4),
+
+      // --------------------------------------------------
+      // NO APP BAR
+      // --------------------------------------------------
+      body: SafeArea(
+        child: LayoutBuilder(
+          builder: (context, constraints) {
+            double screenHeight = constraints.maxHeight;
+            double screenWidth = constraints.maxWidth;
+
+            return Center(
+              child: SingleChildScrollView(
+                padding: EdgeInsets.symmetric(horizontal: screenWidth * 0.08),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisSize:
+                      MainAxisSize.min, // important for perfect centering
+                  children: [
+                    // TOP TITLE
+                    Text(
+                      "Login",
+                      style: TextStyle(
+                        fontSize: screenWidth * 0.08,
+                        fontWeight: FontWeight.bold,
+                        color: isDark ? AppColors.darkText : AppColors.textDark,
+                      ),
+                    ),
+
+                    SizedBox(height: screenHeight * 0.015),
+
+                    // WELCOME TEXT
+                    Text(
+                      "Welcome Back!!",
+                      style: TextStyle(
+                        fontSize: screenWidth * 0.07,
+                        fontWeight: FontWeight.w600,
+                        color: isDark ? AppColors.darkText : AppColors.textDark,
+                      ),
+                    ),
+
+                    SizedBox(height: screenHeight * 0.005),
+
+                    Text(
+                      "Login to continue your learning",
+                      style: TextStyle(
+                        fontSize: screenWidth * 0.04,
+                        color: isDark
+                            ? AppColors.darkSubText
+                            : AppColors.textLight,
+                      ),
+                    ),
+
+                    SizedBox(height: screenHeight * 0.04),
+
+                    // LOGIN CARD
+                    Container(
+                      decoration: neumorphicBox(isDark),
+                      padding: EdgeInsets.symmetric(
+                        horizontal: screenWidth * 0.06,
+                        vertical: screenHeight * 0.04,
+                      ),
+                      child: Column(
+                        children: [
+                          // EMAIL FIELD
+                          Container(
+                            padding: EdgeInsets.symmetric(
+                              horizontal: screenWidth * 0.05,
+                              vertical: screenHeight * 0.005,
+                            ),
+                            decoration: neumorphicBox(isDark),
+                            child: TextField(
+                              controller: emailController,
+                              keyboardType: TextInputType.emailAddress,
+                              style: TextStyle(
+                                color: isDark
+                                    ? AppColors.darkText
+                                    : AppColors.textDark,
+                              ),
+                              decoration: const InputDecoration(
+                                labelText: "Email Address",
+                                border: InputBorder.none,
+                                prefixIcon: Icon(Icons.email),
+                              ),
+                            ),
                           ),
-                        ),
-                        child: Row(
-                          children: [
-                            Expanded(
-                              child: GestureDetector(
-                                onTap: () => setState(() => isEmail = true),
-                                child: Container(
-                                  decoration: BoxDecoration(
-                                    color: isEmail
-                                        ? AppColors.primary
-                                        : Colors.transparent,
-                                    borderRadius: BorderRadius.circular(50),
+
+                          SizedBox(height: screenHeight * 0.02),
+
+                          // PASSWORD FIELD
+                          Container(
+                            padding: EdgeInsets.symmetric(
+                              horizontal: screenWidth * 0.05,
+                              vertical: screenHeight * 0.005,
+                            ),
+                            decoration: neumorphicBox(isDark),
+                            child: TextField(
+                              controller: passwordController,
+                              obscureText: !isPasswordVisible,
+                              style: TextStyle(
+                                color: isDark
+                                    ? AppColors.darkText
+                                    : AppColors.textDark,
+                              ),
+                              decoration: InputDecoration(
+                                labelText: "Password",
+                                border: InputBorder.none,
+                                prefixIcon: const Icon(Icons.lock),
+                                suffixIcon: IconButton(
+                                  icon: Icon(
+                                    isPasswordVisible
+                                        ? Icons.visibility
+                                        : Icons.visibility_off,
+                                    color: AppColors.textLight,
                                   ),
-                                  padding: const EdgeInsets.symmetric(
-                                    vertical: 12,
-                                  ),
-                                  alignment: Alignment.center,
-                                  child: Text(
-                                    "Email",
-                                    style: TextStyle(
-                                      color: isEmail
-                                          ? Colors.white
-                                          : AppColors.textLight,
-                                      fontWeight: FontWeight.w600,
-                                      fontSize: 16,
-                                    ),
+                                  onPressed: () => setState(
+                                    () =>
+                                        isPasswordVisible = !isPasswordVisible,
                                   ),
                                 ),
                               ),
                             ),
-                            Expanded(
-                              child: GestureDetector(
-                                onTap: () => setState(() => isEmail = false),
-                                child: Container(
-                                  decoration: BoxDecoration(
-                                    color: !isEmail
-                                        ? AppColors.primary
-                                        : Colors.transparent,
-                                    borderRadius: BorderRadius.circular(50),
-                                  ),
-                                  padding: const EdgeInsets.symmetric(
-                                    vertical: 12,
-                                  ),
-                                  alignment: Alignment.center,
-                                  child: Text(
-                                    "Phone",
-                                    style: TextStyle(
-                                      color: !isEmail
-                                          ? Colors.white
-                                          : AppColors.textLight,
-                                      fontWeight: FontWeight.w600,
-                                      fontSize: 16,
-                                    ),
-                                  ),
-                                ),
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-
-                      const SizedBox(height: 30),
-
-                      // ----------------------------------------------------
-                      // EMAIL / PHONE INPUT (NEUMORPHIC)
-                      // ----------------------------------------------------
-                      Container(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 18,
-                          vertical: 4,
-                        ),
-                        decoration: neumorphicBox(isDark),
-                        child: TextField(
-                          controller: isEmail
-                              ? emailController
-                              : phoneController,
-                          keyboardType: isEmail
-                              ? TextInputType.emailAddress
-                              : TextInputType.number,
-                          inputFormatters: isEmail
-                              ? []
-                              : [
-                                  FilteringTextInputFormatter.digitsOnly,
-                                  LengthLimitingTextInputFormatter(10),
-                                ],
-                          style: TextStyle(
-                            color: isDark
-                                ? AppColors.darkText
-                                : AppColors.textDark,
                           ),
-                          decoration: InputDecoration(
-                            labelText: isEmail
-                                ? "Email Address"
-                                : "Phone Number",
-                            labelStyle: TextStyle(
-                              color: isDark
-                                  ? AppColors.darkSubText
-                                  : AppColors.textLight,
-                            ),
-                            border: InputBorder.none,
-                            prefixIcon: Icon(
-                              isEmail ? Icons.email : Icons.phone,
-                            ),
-                          ),
-                        ),
-                      ),
 
-                      const SizedBox(height: 20),
+                          SizedBox(height: screenHeight * 0.035),
 
-                      // ----------------------------------------------------
-                      // PASSWORD FIELD (NEUMORPHIC)
-                      // ----------------------------------------------------
-                      Container(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 18,
-                          vertical: 4,
-                        ),
-                        decoration: neumorphicBox(isDark),
-                        child: TextField(
-                          controller: passwordController,
-                          obscureText: !isPasswordVisible,
-                          style: TextStyle(
-                            color: isDark
-                                ? AppColors.darkText
-                                : AppColors.textDark,
-                          ),
-                          decoration: InputDecoration(
-                            labelText: "Password",
-                            border: InputBorder.none,
-                            labelStyle: TextStyle(
-                              color: isDark
-                                  ? AppColors.darkSubText
-                                  : AppColors.textLight,
-                            ),
-                            prefixIcon: const Icon(Icons.lock),
-                            suffixIcon: IconButton(
-                              icon: Icon(
-                                isPasswordVisible
-                                    ? Icons.visibility
-                                    : Icons.visibility_off,
-                                color: AppColors.textLight,
-                              ),
+                          // LOGIN BUTTON
+                          SizedBox(
+                            width: double.infinity,
+                            child: ElevatedButton(
                               onPressed: () {
-                                setState(
-                                  () => isPasswordVisible = !isPasswordVisible,
+                                final email = emailController.text.trim();
+                                final password = passwordController.text.trim();
+
+                                // -------------------------------
+                                // EMPTY CHECK
+                                // -------------------------------
+                                if (email.isEmpty || password.isEmpty) {
+                                  _showError("Please fill all fields");
+                                  return;
+                                }
+
+                                // -------------------------------
+                                // EMAIL VALIDATION
+                                // -------------------------------
+                                bool isValidEmail = RegExp(
+                                  r"^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$",
+                                ).hasMatch(email);
+
+                                if (!isValidEmail) {
+                                  _showError(
+                                    "Please enter a valid email address",
+                                  );
+                                  return;
+                                }
+
+                                // -------------------------------
+                                // PASSWORD MINIMUM LENGTH
+                                // -------------------------------
+                                if (password.length < 6) {
+                                  _showError(
+                                    "Password must be at least 6 characters",
+                                  );
+                                  return;
+                                }
+
+                                // -------------------------------
+                                // SUCCESS → ALLOW LOGIN ALWAYS
+                                // -------------------------------
+                                Navigator.pushReplacement(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (_) => const BottomNavBar(
+                                      showLoginSuccess: true,
+                                    ),
+                                  ),
                                 );
                               },
+
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: AppColors.primary,
+                                padding: EdgeInsets.symmetric(
+                                  vertical: screenHeight * 0.018,
+                                ),
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(15),
+                                ),
+                              ),
+                              child: Text(
+                                "Login",
+
+                                style: TextStyle(
+                                  fontSize: screenWidth * 0.045,
+                                  fontWeight: FontWeight.bold,
+                                  color: Colors.white,
+                                ),
+                              ),
                             ),
                           ),
-                        ),
+                        ],
                       ),
+                    ),
 
-                      const SizedBox(height: 30),
-
-                      // ----------------------------------------------------
-                      // LOGIN BUTTON
-                      // ----------------------------------------------------
-                      SizedBox(
-                        width: double.infinity,
-                        child: ElevatedButton(
-                          onPressed: () {
-                            String input = isEmail
-                                ? emailController.text.trim()
-                                : phoneController.text.trim();
-                            String password = passwordController.text.trim();
-
-                            if (input.isEmpty || password.isEmpty) {
-                              ScaffoldMessenger.of(context).showSnackBar(
-                                const SnackBar(
-                                  content: Text("Please fill all fields"),
-                                  backgroundColor: Colors.red,
-                                ),
-                              );
-                              return;
-                            }
-
-                            if (!isEmail && input.length != 10) {
-                              ScaffoldMessenger.of(context).showSnackBar(
-                                const SnackBar(
-                                  content: Text(
-                                    "Phone number must be 10 digits",
-                                  ),
-                                  backgroundColor: Colors.red,
-                                ),
-                              );
-                              return;
-                            }
-
-                            bool isValid = MockUsers.users.any((user) {
-                              if (isEmail &&
-                                  user["email"] == input &&
-                                  user["password"] == password) {
-                                return true;
-                              }
-                              if (!isEmail &&
-                                  user["phone"] == input &&
-                                  user["password"] == password) {
-                                return true;
-                              }
-                              return false;
-                            });
-
-                            if (isValid) {
-                              Navigator.pushReplacement(
-                                context,
-                                MaterialPageRoute(
-                                  builder: (_) => BottomNavBar(), // FIXED
-                                ),
-                              );
-                            } else {
-                              ScaffoldMessenger.of(context).showSnackBar(
-                                const SnackBar(
-                                  content: Text(
-                                    "Invalid credentials. Try again.",
-                                  ),
-                                  backgroundColor: Colors.red,
-                                ),
-                              );
-                            }
-                          },
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: AppColors.primary,
-                            padding: const EdgeInsets.symmetric(vertical: 16),
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(15),
-                            ),
-                          ),
-                          child: const Text(
-                            "Login",
-                            style: TextStyle(
-                              fontSize: 18,
-                              fontWeight: FontWeight.bold,
-                              color: Colors.white,
-                            ),
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
+                    SizedBox(height: screenHeight * 0.05),
+                  ],
                 ),
               ),
-
-              const SizedBox(height: 25),
-            ],
-          ),
+            );
+          },
         ),
       ),
+    );
+  }
+
+  void _showError(String message) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text(message), backgroundColor: AppColors.primary),
     );
   }
 }

@@ -225,7 +225,9 @@ class ProfilePage extends StatelessWidget {
               Navigator.pop(context);
               Navigator.pushReplacement(
                 context,
-                MaterialPageRoute(builder: (_) => const LoginPage()),
+                MaterialPageRoute(
+                  builder: (_) => const LoginPage(showLogoutSuccess: true),
+                ),
               );
             },
             child: const Text("Confirm", style: TextStyle(color: Colors.white)),
