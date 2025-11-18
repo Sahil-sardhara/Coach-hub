@@ -108,8 +108,8 @@ class ProfilePage extends StatelessWidget {
                 boxShadow: [
                   BoxShadow(
                     color: AppColors.primary.withOpacity(0.4),
-                    blurRadius: 25,
-                    spreadRadius: 2,
+                    blurRadius: 18,
+                    spreadRadius: 1,
                   ),
                 ],
               ),

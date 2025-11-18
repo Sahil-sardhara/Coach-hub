@@ -51,6 +51,7 @@ class _EditProfilePageState extends State<EditProfilePage> {
                       ScaffoldMessenger.of(context).showSnackBar(
                         const SnackBar(
                           content: Text("Profile updated successfully!"),
+                          backgroundColor: AppColors.primary,
                         ),
                       );
                     },
