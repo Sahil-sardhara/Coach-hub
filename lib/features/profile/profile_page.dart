@@ -4,6 +4,7 @@ import 'package:provider/provider.dart';
 import '../../core/theme/app_colors.dart';
 import '../../core/profile_provider.dart';
 import '../../core/theme/neumorphic_box.dart';
+import 'package:flutter_staggered_animations/flutter_staggered_animations.dart';
 import 'EditProfilePage.dart';
 import 'Settings Page.dart';
 import 'About Page.dart';
@@ -20,71 +21,140 @@ class ProfilePage extends StatelessWidget {
     return Scaffold(
       backgroundColor: isDark ? AppColors.darkBackground : AppColors.background,
       body: SafeArea(
-        child: Column(
-          children: [
-            _buildHeader(profile, isDark),
-            const SizedBox(height: 20),
-            Expanded(
-              child: SingleChildScrollView(
-                padding: const EdgeInsets.symmetric(horizontal: 20),
-                child: Column(
-                  children: [
-                    _settingsTile(
-                      icon: Icons.edit,
-                      title: "Edit Profile",
-                      subtitle: "Update your personal details",
-                      isDark: isDark,
-                      onTap: () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (_) => EditProfilePage(
-                              name: profile.name,
-                              email: profile.email,
-                            ),
-                          ),
-                        );
-                      },
-                    ),
-                    _settingsTile(
-                      icon: Icons.settings,
-                      title: "Settings",
-                      subtitle: "Manage your app preferences",
-                      isDark: isDark,
-                      onTap: () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (_) => const SettingsPage(),
-                          ),
-                        );
-                      },
-                    ),
-                    _settingsTile(
-                      icon: Icons.info_outline_rounded,
-                      title: "About",
-                      subtitle: "App version 1.0.0",
-                      isDark: isDark,
-                      onTap: () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(builder: (_) => const AboutPage()),
-                        );
-                      },
-                    ),
-                    _settingsTile(
-                      icon: Icons.logout_rounded,
-                      title: "Logout",
-                      subtitle: "Sign out of your account",
-                      isDark: isDark,
-                      onTap: () => _showLogoutDialog(context),
-                    ),
-                    const SizedBox(height: 40),
-                  ],
+        child: AnimationLimiter(
+          child: Column(
+            children: [
+              AnimationConfiguration.staggeredList(
+                position: 0,
+                delay: const Duration(milliseconds: 100),
+                child: SlideAnimation(
+                  verticalOffset: -40,
+                  curve: Curves.easeOutCubic,
+                  duration: const Duration(milliseconds: 250),
+                  child: FadeInAnimation(
+                    duration: const Duration(milliseconds: 180),
+                    child: _buildHeader(profile, isDark),
+                  ),
                 ),
               ),
-            ),
-          ],
+
+              const SizedBox(height: 20),
+              Expanded(
+                child: SingleChildScrollView(
+                  padding: const EdgeInsets.symmetric(horizontal: 20),
+                  child: Column(
+                    children: [
+                      AnimationConfiguration.staggeredList(
+                        position: 1,
+                        delay: const Duration(milliseconds: 100),
+                        child: SlideAnimation(
+                          horizontalOffset: 40,
+                          curve: Curves.easeOutCubic,
+                          duration: const Duration(milliseconds: 220),
+                          child: FadeInAnimation(
+                            duration: const Duration(milliseconds: 160),
+                            child: _settingsTile(
+                              icon: Icons.edit,
+                              title: "Edit Profile",
+                              subtitle: "Update your personal details",
+                              isDark: isDark,
+                              onTap: () {
+                                Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (_) => EditProfilePage(
+                                      name: profile.name,
+                                      email: profile.email,
+                                    ),
+                                  ),
+                                );
+                              },
+                            ),
+                          ),
+                        ),
+                      ),
+
+                      AnimationConfiguration.staggeredList(
+                        position: 2,
+                        delay: Duration(milliseconds: 100),
+                        child: SlideAnimation(
+                          horizontalOffset: 40,
+                          curve: Curves.easeOutCubic,
+                          duration: Duration(milliseconds: 220),
+                          child: FadeInAnimation(
+                            duration: Duration(milliseconds: 160),
+                            child: _settingsTile(
+                              icon: Icons.settings,
+                              title: "Settings",
+                              subtitle: "Manage your app preferences",
+                              isDark: isDark,
+                              onTap: () {
+                                Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (_) => const SettingsPage(),
+                                  ),
+                                );
+                              },
+                            ),
+                          ),
+                        ),
+                      ),
+
+                      AnimationConfiguration.staggeredList(
+                        position: 3,
+                        delay: Duration(milliseconds: 100),
+                        child: SlideAnimation(
+                          horizontalOffset: 40,
+                          curve: Curves.easeOutCubic,
+                          duration: Duration(milliseconds: 220),
+                          child: FadeInAnimation(
+                            duration: Duration(milliseconds: 160),
+                            child: _settingsTile(
+                              icon: Icons.info_outline_rounded,
+                              title: "About",
+                              subtitle: "App version 1.0.0",
+                              isDark: isDark,
+                              onTap: () {
+                                Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (_) => const AboutPage(),
+                                  ),
+                                );
+                              },
+                            ),
+                          ),
+                        ),
+                      ),
+
+                      AnimationConfiguration.staggeredList(
+                        position: 4,
+                        delay: Duration(milliseconds: 100),
+                        child: SlideAnimation(
+                          horizontalOffset: 40,
+                          curve: Curves.easeOutCubic,
+                          duration: Duration(milliseconds: 220),
+                          child: FadeInAnimation(
+                            duration: Duration(milliseconds: 160),
+                            child: _settingsTile(
+                              icon: Icons.logout_rounded,
+                              title: "Logout",
+                              subtitle: "Sign out of your account",
+                              isDark: isDark,
+                              onTap: () => _showLogoutDialog(context),
+                            ),
+                          ),
+                        ),
+                      ),
+
+                      const SizedBox(height: 40),
+                    ],
+                  ),
+                ),
+              ),
+            ],
+          ),
         ),
       ),
     );

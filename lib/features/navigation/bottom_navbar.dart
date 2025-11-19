@@ -1,3 +1,4 @@
+import 'package:animations/animations.dart';
 import 'package:coach_hub/core/theme/app_colors.dart';
 import 'package:coach_hub/core/theme/dark_mode.dart';
 import 'package:flutter/material.dart';
@@ -41,7 +42,23 @@ class _BottomNavBarState extends State<BottomNavBar> {
     final pages = [HomePage(), MockZoomMeetingPage(), ProfilePage()];
 
     return Scaffold(
-      body: IndexedStack(index: index, children: pages),
+      body: PageTransitionSwitcher(
+        duration: const Duration(milliseconds: 350),
+        transitionBuilder: (child, animation, secondaryAnimation) {
+          return FadeTransition(
+            opacity: animation,
+            child: SlideTransition(
+              position: Tween<Offset>(
+                begin: const Offset(0.05, 0), // slight slide from right
+                end: Offset.zero,
+              ).animate(animation),
+              child: child,
+            ),
+          );
+        },
+        child: KeyedSubtree(key: ValueKey(index), child: pages[index]),
+      ),
+
       bottomNavigationBar: CustomBottomNavBar(
         currentIndex: index,
         isDark: isDark,

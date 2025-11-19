@@ -1,19 +1,11 @@
 import 'package:coach_hub/core/theme/app_colors.dart';
-import 'package:coach_hub/model/Event_Model.dart';
+import 'package:coach_hub/model/event_model.dart';
 import 'package:flutter/material.dart';
 
-class UpcomingEventDetailPage extends StatefulWidget {
+class UpcomingEventDetailPage extends StatelessWidget {
   final Event event;
 
   const UpcomingEventDetailPage({super.key, required this.event});
-
-  @override
-  State<UpcomingEventDetailPage> createState() =>
-      _UpcomingEventDetailPageState();
-}
-
-class _UpcomingEventDetailPageState extends State<UpcomingEventDetailPage> {
-  bool expanded = false;
 
   String _extractTimeOnly(String formattedTime) =>
       formattedTime.split(',')[0].trim();
@@ -47,8 +39,13 @@ class _UpcomingEventDetailPageState extends State<UpcomingEventDetailPage> {
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
-    final displayTime = _extractTimeOnly(widget.event.time);
-    final displayDate = _extractDateOnly(widget.event.time);
+
+    final displayTime = _extractTimeOnly(event.time);
+    final displayDate = _extractDateOnly(event.time);
+
+    final bool isFree = event.isFree;
+    final String priceLabel = event.priceLabel;
+    final int availableSlots = event.slots;
 
     return Scaffold(
       backgroundColor: isDark ? AppColors.darkBackground : AppColors.background,
@@ -62,7 +59,7 @@ class _UpcomingEventDetailPageState extends State<UpcomingEventDetailPage> {
         ),
         centerTitle: true,
         title: Text(
-          widget.event.title,
+          event.title,
           maxLines: 1,
           overflow: TextOverflow.ellipsis,
           style: const TextStyle(color: Colors.white),
@@ -73,24 +70,29 @@ class _UpcomingEventDetailPageState extends State<UpcomingEventDetailPage> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // ⭐ FULL-WIDTH HERO IMAGE ⭐
-            ClipRRect(
-              child: Image.network(
-                widget.event.imageUrl,
-                width: double.infinity,
-                height: MediaQuery.of(context).size.height * 0.30,
-                fit: BoxFit.cover,
-              ),
-            ),
+            // ⭐ IMAGE BANNER
+            event.imageAsset != null
+                ? Image.asset(
+                    event.imageAsset!,
+                    width: double.infinity,
+                    height: MediaQuery.of(context).size.height * 0.30,
+                    fit: BoxFit.cover,
+                  )
+                : Image.network(
+                    event.imageUrl!,
+                    width: double.infinity,
+                    height: MediaQuery.of(context).size.height * 0.30,
+                    fit: BoxFit.cover,
+                  ),
 
             Padding(
               padding: const EdgeInsets.all(18),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  // TITLE
+                  // ⭐ TITLE
                   Text(
-                    widget.event.title,
+                    event.title,
                     style: TextStyle(
                       fontSize: 24,
                       fontWeight: FontWeight.bold,
@@ -98,98 +100,96 @@ class _UpcomingEventDetailPageState extends State<UpcomingEventDetailPage> {
                     ),
                   ),
 
-                  const SizedBox(height: 20),
+                  const SizedBox(height: 16),
 
-                  // ⭐ DATE & TIME CARD ⭐
-                  Container(
-                    width: double.infinity,
-                    padding: const EdgeInsets.all(16),
-                    decoration: BoxDecoration(
-                      color: isDark ? AppColors.darkCard : Colors.white,
-                      borderRadius: BorderRadius.circular(14),
-                      boxShadow: [
-                        BoxShadow(
-                          color: isDark
-                              ? AppColors.darkDarkShadow
-                              : Colors.black.withOpacity(0.08),
-                          blurRadius: 8,
-                          offset: const Offset(2, 2),
-                        ),
-                      ],
-                    ),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        _infoRow(Icons.calendar_month, displayDate, isDark),
-                        const SizedBox(height: 6),
-                        _infoRow(Icons.access_time, displayTime, isDark),
-                        const SizedBox(height: 6),
-                        _infoRow(Icons.language, "IST (UTC+5:30)", isDark),
-                      ],
-                    ),
+                  // ⭐ TIME + LANGUAGE
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      _infoRow(Icons.access_time, displayTime, isDark),
+                      _infoRow(Icons.language, "IST (UTC+5:30)", isDark),
+                    ],
                   ),
 
-                  const SizedBox(height: 25),
+                  const SizedBox(height: 12),
 
-                  // SHORT DESCRIPTION
+                  // ⭐ DATE + PRICE
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      _infoRow(Icons.calendar_month, displayDate, isDark),
+                      Text(
+                        event.isFree
+                            ? "FREE"
+                            : "SAR ${event.price.toStringAsFixed(2)}",
+                        style: TextStyle(
+                          fontSize: 18,
+                          fontWeight: FontWeight.bold,
+                          color: event.isFree
+                              ? Colors.green
+                              : AppColors.primary,
+                        ),
+                      ),
+                    ],
+                  ),
+
+                  const SizedBox(height: 12),
+
+                  // ⭐ SLOTS LEFT (RED IF <=10)
+                  Row(
+                    children: [
+                      Icon(Icons.chair, size: 20, color: AppColors.primary),
+                      const SizedBox(width: 8),
+
+                      Text(
+                        "${event.slots} spots left",
+                        style: TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.w600,
+                          color: event.slots <= 10
+                              ? Colors.red
+                              : AppColors.primary,
+                        ),
+                      ),
+                    ],
+                  ),
+
+                  const SizedBox(height: 20),
+
+                  // ⭐ FULL DESCRIPTION
                   Text(
-                    widget.event.description,
-                    maxLines: 3,
-                    overflow: TextOverflow.ellipsis,
+                    event.description,
                     style: TextStyle(
                       fontSize: 16,
-                      height: 1.5,
+                      height: 1.6,
                       color: isDark
                           ? AppColors.darkSubText
                           : AppColors.textDark,
                     ),
                   ),
 
-                  const SizedBox(height: 20),
+                  const SizedBox(height: 30),
 
-                  // ⭐ NOTIFY ME BUTTON ⭐
-                  SizedBox(
-                    width: double.infinity,
-                    child: ElevatedButton.icon(
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: AppColors.primary,
-                        padding: const EdgeInsets.symmetric(vertical: 14),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(14),
-                        ),
-                      ),
-                      onPressed: () {},
-                      icon: const Icon(
-                        Icons.notifications_active,
-                        color: Colors.white,
-                      ),
-                      label: const Text(
-                        "Notify Me",
-                        style: TextStyle(color: Colors.white, fontSize: 17),
-                      ),
-                    ),
-                  ),
-
-                  const SizedBox(height: 14),
-
-                  // ⭐ ADD TO CALENDAR BUTTON ⭐
+                  // ⭐ REGISTER NOW BUTTON
                   SizedBox(
                     width: double.infinity,
                     child: ElevatedButton(
                       style: ElevatedButton.styleFrom(
-                        backgroundColor: AppColors.primary.withOpacity(0.15),
-                        elevation: 0,
-                        padding: const EdgeInsets.symmetric(vertical: 14),
+                        backgroundColor: AppColors.primary,
+                        padding: const EdgeInsets.symmetric(vertical: 16),
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(14),
                         ),
                       ),
-                      onPressed: () {},
-                      child: Text(
-                        "Add to Calendar",
+                      onPressed: () {
+                        // TODO: Implement register action
+                      },
+                      child: const Text(
+                        "Register Now",
                         style: TextStyle(
+                          fontSize: 18,
+                          color: Colors.white,
                           fontWeight: FontWeight.bold,
-                          color: AppColors.primary,
                         ),
                       ),
                     ),
@@ -197,98 +197,8 @@ class _UpcomingEventDetailPageState extends State<UpcomingEventDetailPage> {
 
                   const SizedBox(height: 30),
 
-                  // ⭐ ABOUT HEADER ⭐
-                  Text(
-                    "About This Event",
-                    style: TextStyle(
-                      fontSize: 22,
-                      fontWeight: FontWeight.bold,
-                      color: isDark ? AppColors.darkText : AppColors.textDark,
-                    ),
-                  ),
-
-                  const SizedBox(height: 16),
-
-                  // ⭐ EXPANDABLE FULL SECTION ⭐
-                  AnimatedCrossFade(
-                    firstChild: Text(
-                      widget.event.description,
-                      maxLines: 4,
-                      overflow: TextOverflow.ellipsis,
-                      style: TextStyle(
-                        fontSize: 16,
-                        height: 1.6,
-                        color: isDark
-                            ? AppColors.darkSubText
-                            : AppColors.textDark,
-                      ),
-                    ),
-                    secondChild: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          widget.event.description,
-                          style: TextStyle(
-                            fontSize: 16,
-                            height: 1.6,
-                            color: isDark
-                                ? AppColors.darkSubText
-                                : AppColors.textDark,
-                          ),
-                        ),
-
-                        const SizedBox(height: 25),
-
-                        // ⭐ RICH TEXT SECTION ⭐
-                        buildRichTextSection(isDark),
-
-                        const SizedBox(height: 30),
-
-                        // ⭐ CONTRACT BUTTON ⭐
-                        SizedBox(
-                          width: double.infinity,
-                          child: OutlinedButton.icon(
-                            icon: const Icon(Icons.description),
-                            label: const Text("View Contract"),
-                            style: OutlinedButton.styleFrom(
-                              foregroundColor: AppColors.primary,
-                              side: const BorderSide(color: AppColors.primary),
-                              padding: const EdgeInsets.symmetric(vertical: 14),
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(12),
-                              ),
-                            ),
-                            onPressed: () {
-                              _openContractDialog(
-                                context,
-                                isDark,
-                                displayTime,
-                                displayDate,
-                              );
-                            },
-                          ),
-                        ),
-                      ],
-                    ),
-                    crossFadeState: expanded
-                        ? CrossFadeState.showSecond
-                        : CrossFadeState.showFirst,
-                    duration: const Duration(milliseconds: 250),
-                  ),
-
-                  const SizedBox(height: 10),
-
-                  GestureDetector(
-                    onTap: () => setState(() => expanded = !expanded),
-                    child: Text(
-                      expanded ? "Read Less" : "Read More",
-                      style: TextStyle(
-                        color: AppColors.primary,
-                        fontWeight: FontWeight.bold,
-                        fontSize: 15,
-                      ),
-                    ),
-                  ),
+                  // ⭐ RICH CONTENT SECTION
+                  buildRichTextSection(isDark),
 
                   const SizedBox(height: 40),
                 ],
@@ -300,7 +210,15 @@ class _UpcomingEventDetailPageState extends State<UpcomingEventDetailPage> {
     );
   }
 
-  Widget _infoRow(IconData icon, String text, bool isDark) {
+  // ----------------------------------------------------
+  // ⭐ INFO ROW WIDGET
+  // ----------------------------------------------------
+  Widget _infoRow(
+    IconData icon,
+    String text,
+    bool isDark, {
+    Color? valueColor,
+  }) {
     return Row(
       children: [
         Icon(icon, size: 18, color: AppColors.primary),
@@ -309,13 +227,19 @@ class _UpcomingEventDetailPageState extends State<UpcomingEventDetailPage> {
           text,
           style: TextStyle(
             fontSize: 15,
-            color: isDark ? AppColors.darkText : AppColors.textDark,
+            fontWeight: FontWeight.w500,
+            color:
+                valueColor ??
+                (isDark ? AppColors.darkText : AppColors.textDark),
           ),
         ),
       ],
     );
   }
 
+  // ----------------------------------------------------
+  // ⭐ RICH TEXT SECTION
+  // ----------------------------------------------------
   Widget buildRichTextSection(bool isDark) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -349,11 +273,11 @@ class _UpcomingEventDetailPageState extends State<UpcomingEventDetailPage> {
             ],
           ),
         ),
-        const SizedBox(height: 25),
-        NumberedText(number: 1, text: "Core leadership insight explained."),
         const SizedBox(height: 14),
+        NumberedText(number: 1, text: "Core leadership insight explained."),
+        const SizedBox(height: 10),
         NumberedText(number: 2, text: "Another deep leadership takeaway."),
-        const SizedBox(height: 25),
+        const SizedBox(height: 20),
         Container(
           padding: const EdgeInsets.all(14),
           decoration: BoxDecoration(
@@ -374,54 +298,11 @@ class _UpcomingEventDetailPageState extends State<UpcomingEventDetailPage> {
       ],
     );
   }
-
-  void _openContractDialog(
-    BuildContext context,
-    bool isDark,
-    String time,
-    String date,
-  ) {
-    showDialog(
-      context: context,
-      builder: (_) => AlertDialog(
-        backgroundColor: isDark ? AppColors.darkCard : Colors.white,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
-        title: Text(
-          widget.event.title,
-          style: TextStyle(
-            fontWeight: FontWeight.bold,
-            color: isDark ? AppColors.darkText : AppColors.textDark,
-          ),
-        ),
-        content: Text(
-          "📅 Date: $date\n"
-          "⏰ Time: $time\n\n"
-          "Terms & Conditions:\n\n"
-          "• Event must be attended on the given date.\n"
-          "• Fees non-refundable once booked.\n"
-          "• All content belongs to Coach Hub.\n"
-          "• Joining means accepting all terms.\n",
-          style: TextStyle(
-            height: 1.4,
-            color: isDark ? AppColors.darkSubText : AppColors.textDark,
-          ),
-        ),
-        actions: [
-          Center(
-            child: TextButton(
-              child: const Text(
-                "Close",
-                style: TextStyle(color: AppColors.primary),
-              ),
-              onPressed: () => Navigator.pop(context),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
 }
 
+// ----------------------------------------------------
+// ⭐ NUMBERED TEXT COMPONENT
+// ----------------------------------------------------
 class NumberedText extends StatelessWidget {
   final int number;
   final String text;
@@ -432,29 +313,32 @@ class NumberedText extends StatelessWidget {
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
 
-    return Row(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          "$number.",
-          style: TextStyle(
-            fontSize: 16,
-            color: AppColors.primary,
-            fontWeight: FontWeight.bold,
-          ),
-        ),
-        const SizedBox(width: 8),
-        Expanded(
-          child: Text(
-            text,
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 8),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            "$number.",
             style: TextStyle(
               fontSize: 16,
-              height: 1.6,
-              color: isDark ? AppColors.darkSubText : AppColors.textDark,
+              color: AppColors.primary,
+              fontWeight: FontWeight.bold,
             ),
           ),
-        ),
-      ],
+          const SizedBox(width: 8),
+          Expanded(
+            child: Text(
+              text,
+              style: TextStyle(
+                fontSize: 16,
+                height: 1.6,
+                color: isDark ? AppColors.darkSubText : AppColors.textDark,
+              ),
+            ),
+          ),
+        ],
+      ),
     );
   }
 }

@@ -1,5 +1,5 @@
 import 'package:coach_hub/core/theme/dark_mode.dart';
-import 'package:coach_hub/model/Event_Model.dart';
+import 'package:coach_hub/model/event_model.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../core/theme/app_colors.dart';

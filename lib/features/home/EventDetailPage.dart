@@ -1,5 +1,5 @@
 import 'package:coach_hub/core/theme/app_colors.dart';
-import 'package:coach_hub/model/Event_Model.dart';
+import 'package:coach_hub/model/event_model.dart';
 import 'package:flutter/material.dart';
 import '../zoom/mock_zoom_meeting_page.dart';
 
@@ -13,8 +13,12 @@ class EventDetailPage extends StatefulWidget {
 }
 
 class _EventDetailPageState extends State<EventDetailPage> {
-  late ScrollController _scrollController;
-  bool isCollapsed = false;
+  // Short title - first 3 words only
+  String _shortTitle3Words(String title) {
+    final words = title.split(" ");
+    if (words.length <= 3) return title;
+    return "${words[0]} ${words[1]} ${words[2]} ...";
+  }
 
   String _extractTimeOnly(String formattedTime) =>
       formattedTime.split(',')[0].trim();
@@ -45,30 +49,63 @@ class _EventDetailPageState extends State<EventDetailPage> {
     return "$fullMonth ${split[1]}, ${split[2]}";
   }
 
-  @override
-  void initState() {
-    super.initState();
-    _scrollController = ScrollController();
-    _scrollController.addListener(() {
-      if (_scrollController.offset > 180 && !isCollapsed) {
-        setState(() => isCollapsed = true);
-      } else if (_scrollController.offset <= 180 && isCollapsed) {
-        setState(() => isCollapsed = false);
-      }
-    });
+  Widget _contractInfoRow(
+    IconData icon,
+    String label,
+    String value,
+    bool isDark,
+  ) {
+    return Row(
+      children: [
+        Icon(icon, size: 18, color: AppColors.primary),
+        const SizedBox(width: 10),
+        Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                label,
+                style: TextStyle(
+                  fontSize: 13,
+                  color: isDark ? AppColors.darkSubText : Colors.grey.shade600,
+                ),
+              ),
+              const SizedBox(height: 2),
+              Text(
+                value,
+                style: TextStyle(
+                  fontSize: 15,
+                  fontWeight: FontWeight.w600,
+                  color: isDark ? AppColors.darkText : AppColors.textDark,
+                ),
+              ),
+            ],
+          ),
+        ),
+      ],
+    );
   }
 
-  @override
-  void dispose() {
-    _scrollController.dispose();
-    super.dispose();
-  }
-
-  // 🔥 FIRST TWO WORDS ONLY + ...
-  String _shortTitle(String title) {
-    final words = title.split(" ");
-    if (words.length <= 3) return title;
-    return "${words[0]} ${words[1]} ${words[2]} ...";
+  Widget _bulletPoint(String text, bool isDark) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 10),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const Text("•  ", style: TextStyle(fontSize: 18)),
+          Expanded(
+            child: Text(
+              text,
+              style: TextStyle(
+                fontSize: 15,
+                height: 1.4,
+                color: isDark ? AppColors.darkSubText : AppColors.textDark,
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
   }
 
   @override
@@ -80,375 +117,420 @@ class _EventDetailPageState extends State<EventDetailPage> {
 
     return Scaffold(
       backgroundColor: isDark ? AppColors.darkBackground : AppColors.background,
-      body: SafeArea(
-        child: CustomScrollView(
-          controller: _scrollController,
-          slivers: [
-            // -------------------------------------------------------
-            // SLIVER APP BAR
-            // -------------------------------------------------------
-            SliverAppBar(
-              expandedHeight: 250,
-              pinned: true,
-              backgroundColor: AppColors.primary,
-              automaticallyImplyLeading: false,
 
-              leading: Padding(
-                padding: const EdgeInsets.only(top: 13, left: 12),
-                child: CircleAvatar(
-                  backgroundColor: isCollapsed
-                      ? Colors.transparent
-                      : Colors.white.withOpacity(0.75),
-                  child: IconButton(
-                    icon: Icon(
-                      Icons.arrow_back,
-                      color: isCollapsed ? Colors.white : AppColors.primary,
-                    ),
-                    onPressed: () => Navigator.pop(context),
+      // ⭐ NORMAL APP BAR, NO COLLAPSING
+      appBar: AppBar(
+        backgroundColor: AppColors.primary,
+        elevation: 0,
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back, color: Colors.white),
+          onPressed: () => Navigator.pop(context),
+        ),
+        centerTitle: true,
+        title: Text(
+          widget.event.title,
+          maxLines: 1,
+          overflow: TextOverflow.ellipsis,
+          style: const TextStyle(color: Colors.white),
+        ),
+      ),
+
+      body: SingleChildScrollView(
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            // ⭐ IMAGE BANNER
+            widget.event.imageAsset != null
+                ? Image.asset(
+                    widget.event.imageAsset!,
+                    width: double.infinity,
+                    height: MediaQuery.of(context).size.height * 0.30,
+                    fit: BoxFit.cover,
+                  )
+                : Image.network(
+                    widget.event.imageUrl!,
+                    width: double.infinity,
+                    height: MediaQuery.of(context).size.height * 0.30,
+                    fit: BoxFit.cover,
                   ),
-                ),
-              ),
 
-              flexibleSpace: FlexibleSpaceBar(
-                collapseMode: CollapseMode.parallax,
-                centerTitle: true,
-                titlePadding: const EdgeInsets.only(bottom: 12),
+            Padding(
+              padding: const EdgeInsets.all(18),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  // ⭐ TITLE
+                  Text(
+                    widget.event.title,
+                    style: TextStyle(
+                      fontSize: 26,
+                      fontWeight: FontWeight.bold,
+                      color: isDark ? AppColors.darkText : AppColors.textDark,
+                    ),
+                  ),
 
-                title: isCollapsed
-                    ? Text(
-                        _shortTitle(widget.event.title),
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                        textAlign: TextAlign.center,
-                        style: const TextStyle(
-                          fontSize: 17,
-                          fontWeight: FontWeight.w600,
-                          color: Colors.white,
-                        ),
-                      )
-                    : null,
+                  const SizedBox(height: 12),
 
-                background: Hero(
-                  tag: widget.event.title,
-                  child: Stack(
+                  // ⭐ TIME + TIMEZONE
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      Positioned.fill(
-                        child: Image.network(
-                          widget.event.imageUrl,
-                          fit: BoxFit.cover,
-                        ),
-                      ),
-                      Positioned.fill(
-                        child: Container(
-                          decoration: BoxDecoration(
-                            gradient: LinearGradient(
-                              begin: Alignment.topCenter,
-                              end: Alignment.bottomCenter,
-                              colors: [
-                                Colors.black.withOpacity(0.30),
-                                Colors.transparent,
-                                Colors.black.withOpacity(0.30),
-                              ],
-                            ),
-                          ),
+                      _infoRow(Icons.access_time, displayTime, isDark),
+                      _infoRow(Icons.language, "IST (UTC+5:30)", isDark),
+                    ],
+                  ),
+
+                  const SizedBox(height: 8),
+
+                  // ⭐ DATE + PRICE
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      _infoRow(Icons.calendar_month, displayDate, isDark),
+                      Text(
+                        widget.event.isFree
+                            ? "FREE"
+                            : "SAR ${widget.event.price.toStringAsFixed(2)}",
+                        style: const TextStyle(
+                          fontSize: 18,
+                          fontWeight: FontWeight.bold,
+                          color: AppColors.primary,
                         ),
                       ),
                     ],
                   ),
-                ),
-              ),
-            ),
 
-            // -------------------------------------------------------
-            // MAIN CONTENT
-            // -------------------------------------------------------
-            SliverToBoxAdapter(
-              child: Padding(
-                padding: const EdgeInsets.all(18),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    // TITLE
-                    Text(
-                      widget.event.title,
-                      style: TextStyle(
-                        fontSize: 26,
-                        fontWeight: FontWeight.bold,
-                        color: isDark ? AppColors.darkText : AppColors.textDark,
+                  const SizedBox(height: 20),
+
+                  // ⭐ DESCRIPTION
+                  Text(
+                    widget.event.description,
+                    style: TextStyle(
+                      fontSize: 16,
+                      height: 1.5,
+                      color: isDark
+                          ? AppColors.darkSubText
+                          : AppColors.textDark,
+                    ),
+                  ),
+
+                  const SizedBox(height: 30),
+
+                  // ⭐ JOIN NOW BUTTON
+                  SizedBox(
+                    width: double.infinity,
+                    child: ElevatedButton(
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: AppColors.primary,
+                        padding: const EdgeInsets.symmetric(vertical: 14),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(14),
+                        ),
                       ),
-                    ),
-
-                    const SizedBox(height: 12),
-
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        _infoRow(Icons.access_time, displayTime, isDark),
-                        _infoRow(Icons.language, "IST (UTC+5:30)", isDark),
-                      ],
-                    ),
-
-                    const SizedBox(height: 8),
-
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        _infoRow(Icons.calendar_month, displayDate, isDark),
-                        const Text(
-                          "SAR 29.99",
-                          style: TextStyle(
-                            fontSize: 18,
-                            fontWeight: FontWeight.bold,
-                            color: AppColors.primary,
+                      onPressed: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (_) => const MockZoomMeetingPage(),
                           ),
-                        ),
-                      ],
-                    ),
-
-                    const SizedBox(height: 20),
-
-                    Text(
-                      widget.event.description,
-                      style: TextStyle(
-                        fontSize: 16,
-                        height: 1.5,
-                        color: isDark
-                            ? AppColors.darkSubText
-                            : AppColors.textDark,
+                        );
+                      },
+                      child: const Text(
+                        "Join Now",
+                        style: TextStyle(fontSize: 18, color: Colors.white),
                       ),
                     ),
+                  ),
 
-                    const SizedBox(height: 30),
+                  const SizedBox(height: 30),
 
-                    // -------------------------------------------------------
-                    // JOIN NOW BUTTON
-                    // -------------------------------------------------------
-                    SizedBox(
-                      width: double.infinity,
-                      child: ElevatedButton(
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: AppColors.primary,
-                          padding: const EdgeInsets.symmetric(vertical: 14),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(14),
+                  // ⭐ RECORDED SESSIONS
+                  Text(
+                    "Recorded Sessions",
+                    style: TextStyle(
+                      fontSize: 20,
+                      fontWeight: FontWeight.bold,
+                      color: isDark ? AppColors.darkText : AppColors.textDark,
+                    ),
+                  ),
+
+                  const SizedBox(height: 12),
+
+                  SizedBox(
+                    height: 200,
+                    child: ListView.separated(
+                      scrollDirection: Axis.horizontal,
+                      itemCount: 3,
+                      separatorBuilder: (_, __) => const SizedBox(width: 16),
+                      itemBuilder: (context, index) {
+                        return Container(
+                          width: 280,
+                          decoration: BoxDecoration(
+                            color: isDark ? AppColors.darkCard : Colors.white,
+                            borderRadius: BorderRadius.circular(10),
+                            boxShadow: [
+                              BoxShadow(
+                                color: Colors.black.withOpacity(0.08),
+                                blurRadius: 6,
+                                offset: const Offset(0, 3),
+                              ),
+                            ],
                           ),
-                        ),
-                        onPressed: () {
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (_) => const MockZoomMeetingPage(),
-                            ),
-                          );
-                        },
-                        child: const Text(
-                          "Join Now",
-                          style: TextStyle(fontSize: 18, color: Colors.white),
-                        ),
-                      ),
-                    ),
-
-                    // -------------------------------------------------------
-                    // RECORDED SESSIONS (HORIZONTAL FULL CARDS)
-                    // -------------------------------------------------------
-                    const SizedBox(height: 30),
-
-                    Text(
-                      "Recorded Sessions",
-                      style: TextStyle(
-                        fontSize: 20,
-                        fontWeight: FontWeight.bold,
-                        color: isDark ? AppColors.darkText : AppColors.textDark,
-                      ),
-                    ),
-
-                    const SizedBox(height: 12),
-
-                    SizedBox(
-                      height: 200,
-                      child: ListView.separated(
-                        scrollDirection: Axis.horizontal,
-                        itemCount: 3,
-                        separatorBuilder: (_, __) => const SizedBox(width: 16),
-                        itemBuilder: (context, index) {
-                          return Container(
-                            width: 240,
-                            decoration: BoxDecoration(
-                              color: isDark ? AppColors.darkCard : Colors.white,
-                              borderRadius: BorderRadius.circular(16),
-                              boxShadow: [
-                                BoxShadow(
-                                  color: Colors.black.withOpacity(0.12),
-                                  blurRadius: 6,
-                                  offset: const Offset(0, 3),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              ClipRRect(
+                                borderRadius: const BorderRadius.vertical(
+                                  top: Radius.circular(16),
                                 ),
-                              ],
-                            ),
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                // IMAGE WITH PLAY + DURATION INSIDE IMAGE
-                                ClipRRect(
-                                  borderRadius: const BorderRadius.vertical(
-                                    top: Radius.circular(16),
-                                  ),
-                                  child: Stack(
-                                    children: [
-                                      Image.network(
-                                        widget.event.imageUrl,
-                                        height: 150,
-                                        width: 240,
-                                        fit: BoxFit.cover,
-                                      ),
+                                child: Stack(
+                                  children: [
+                                    // IMAGE
+                                    widget.event.imageAsset != null
+                                        ? Image.asset(
+                                            widget.event.imageAsset!,
+                                            height: 150,
+                                            width: 280,
+                                            fit: BoxFit.cover,
+                                          )
+                                        : Image.network(
+                                            widget.event.imageUrl!,
+                                            height: 150,
+                                            width: 280,
+                                            fit: BoxFit.cover,
+                                          ),
 
-                                      // Dark overlay for better visibility
-                                      Positioned.fill(
-                                        child: Container(color: Colors.black26),
+                                    // DARK OVERLAY (TO MAKE TEXT + ICON CLEAR)
+                                    Positioned.fill(
+                                      child: Container(
+                                        color: Colors.black.withOpacity(0.25),
                                       ),
+                                    ),
 
-                                      // Play Icon (TOP LEFT)
-                                      const Positioned(
-                                        top: 10,
-                                        left: 10,
+                                    // PLAY ICON
+                                    const Positioned(
+                                      top: 8,
+                                      left: 8,
+                                      child: CircleAvatar(
+                                        backgroundColor: Colors.white,
+                                        radius: 16,
                                         child: Icon(
-                                          Icons.play_circle_fill,
-                                          color: Colors.white,
-                                          size: 34,
+                                          Icons.play_arrow,
+                                          size: 20,
+                                          color: AppColors.primary,
                                         ),
                                       ),
+                                    ),
 
-                                      // Duration (BOTTOM LEFT — INSIDE IMAGE)
-                                      Positioned(
-                                        bottom: 10,
-                                        left: 10,
-                                        child: Container(
-                                          padding: const EdgeInsets.symmetric(
-                                            vertical: 4,
-                                            horizontal: 8,
+                                    // DURATION LABEL
+                                    Positioned(
+                                      bottom: 10,
+                                      left: 10,
+                                      child: Container(
+                                        padding: const EdgeInsets.symmetric(
+                                          vertical: 4,
+                                          horizontal: 10,
+                                        ),
+                                        decoration: BoxDecoration(
+                                          color: Colors.black87,
+                                          borderRadius: BorderRadius.circular(
+                                            8,
                                           ),
-                                          decoration: BoxDecoration(
-                                            color: Colors.black87,
-                                            borderRadius: BorderRadius.circular(
-                                              6,
-                                            ),
-                                          ),
-                                          child: Text(
-                                            "12:0$index min",
-                                            style: const TextStyle(
-                                              fontSize: 12,
-                                              color: Colors.white,
-                                              fontWeight: FontWeight.w600,
-                                            ),
+                                        ),
+                                        child: Text(
+                                          "12:0$index min",
+                                          style: const TextStyle(
+                                            fontSize: 12,
+                                            color: Colors.white,
+                                            fontWeight: FontWeight.w600,
                                           ),
                                         ),
                                       ),
-                                    ],
+                                    ),
+                                  ],
+                                ),
+                              ),
+
+                              // TITLE BELOW IMAGE
+                              Padding(
+                                padding: const EdgeInsets.all(10),
+                                child: Text(
+                                  "Recorded Video ${index + 1}",
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
+                                  style: TextStyle(
+                                    fontSize: 17,
+                                    fontWeight: FontWeight.w600,
+                                    color: isDark
+                                        ? AppColors.darkText
+                                        : AppColors.textDark,
                                   ),
                                 ),
+                              ),
+                            ],
+                          ),
+                        );
+                      },
+                    ),
+                  ),
 
-                                // VIDEO TITLE BELOW IMAGE
-                                Padding(
-                                  padding: const EdgeInsets.all(10),
-                                  child: Text(
-                                    "Recorded Video ${index + 1}",
-                                    maxLines: 1,
-                                    overflow: TextOverflow.ellipsis,
+                  const SizedBox(height: 20),
+
+                  buildRichTextSection(isDark),
+
+                  const SizedBox(height: 30),
+
+                  SizedBox(
+                    width: double.infinity,
+                    child: OutlinedButton.icon(
+                      icon: const Icon(Icons.description),
+                      label: const Text("View Contract"),
+                      style: OutlinedButton.styleFrom(
+                        foregroundColor: AppColors.primary,
+                        side: const BorderSide(color: AppColors.primary),
+                        padding: const EdgeInsets.symmetric(vertical: 14),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                      ),
+                      onPressed: () {
+                        showDialog(
+                          context: context,
+                          builder: (_) => Dialog(
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(18),
+                            ),
+                            child: Container(
+                              padding: const EdgeInsets.all(22),
+                              decoration: BoxDecoration(
+                                color: isDark
+                                    ? AppColors.darkCard
+                                    : Colors.white,
+                                borderRadius: BorderRadius.circular(18),
+                              ),
+                              child: Column(
+                                mainAxisSize: MainAxisSize.min,
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  // TITLE
+                                  Text(
+                                    "Event Contract",
                                     style: TextStyle(
-                                      fontSize: 15,
-                                      fontWeight: FontWeight.w600,
+                                      fontSize: 20,
+                                      fontWeight: FontWeight.bold,
                                       color: isDark
                                           ? AppColors.darkText
                                           : AppColors.textDark,
                                     ),
                                   ),
-                                ),
-                              ],
-                            ),
-                          );
-                        },
-                      ),
-                    ),
 
-                    // -------------------------------------------------------
-                    // RICH TEXT (YOUR EXISTING SECTION - UNTOUCHED)
-                    // -------------------------------------------------------
-                    const SizedBox(height: 30),
-                    buildRichTextSection(isDark),
+                                  const SizedBox(height: 14),
 
-                    // -------------------------------------------------------
-                    // VIEW CONTRACT
-                    // -------------------------------------------------------
-                    const SizedBox(height: 30),
+                                  // EVENT NAME
+                                  Text(
+                                    widget.event.title,
+                                    style: TextStyle(
+                                      fontSize: 16,
+                                      fontWeight: FontWeight.w600,
+                                      color: AppColors.primary,
+                                    ),
+                                  ),
 
-                    SizedBox(
-                      width: double.infinity,
-                      child: OutlinedButton.icon(
-                        icon: const Icon(Icons.description),
-                        label: const Text("View Contract"),
-                        style: OutlinedButton.styleFrom(
-                          foregroundColor: AppColors.primary,
-                          side: const BorderSide(color: AppColors.primary),
-                          padding: const EdgeInsets.symmetric(vertical: 14),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(12),
-                          ),
-                        ),
-                        onPressed: () {
-                          showDialog(
-                            context: context,
-                            builder: (_) => AlertDialog(
-                              backgroundColor: isDark
-                                  ? AppColors.darkCard
-                                  : Colors.white,
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(14),
-                              ),
-                              title: Text(
-                                widget.event.title,
-                                style: TextStyle(
-                                  fontWeight: FontWeight.bold,
-                                  color: isDark
-                                      ? AppColors.darkText
-                                      : AppColors.textDark,
-                                ),
-                              ),
-                              content: Text(
-                                "📅 Date: $displayDate\n"
-                                "⏰ Time: $displayTime\n\n"
-                                "Terms & Conditions:\n\n"
-                                "• You must attend on the specified date.\n"
-                                "• Fees are non-refundable unless cancelled.\n"
-                                "• Content belongs to Coach Hub.\n"
-                                "• By joining, you accept these terms.\n",
-                                style: TextStyle(
-                                  height: 1.4,
-                                  color: isDark
-                                      ? AppColors.darkSubText
-                                      : AppColors.textDark,
-                                ),
-                              ),
-                              actions: [
-                                Center(
-                                  child: TextButton(
-                                    child: const Text(
-                                      "Close",
-                                      style: TextStyle(
-                                        color: AppColors.primary,
+                                  const SizedBox(height: 16),
+
+                                  // DATE & TIME BOX
+                                  Column(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                    children: [
+                                      _contractInfoRow(
+                                        Icons.calendar_month,
+                                        "Date",
+                                        displayDate,
+                                        isDark,
+                                      ),
+                                      const SizedBox(height: 8),
+                                      _contractInfoRow(
+                                        Icons.access_time,
+                                        "Time",
+                                        displayTime,
+                                        isDark,
+                                      ),
+                                    ],
+                                  ),
+
+                                  const SizedBox(height: 22),
+
+                                  // TERMS HEADER
+                                  Text(
+                                    "Terms & Conditions",
+                                    style: TextStyle(
+                                      fontSize: 16,
+                                      fontWeight: FontWeight.bold,
+                                      color: isDark
+                                          ? AppColors.darkText
+                                          : AppColors.textDark,
+                                    ),
+                                  ),
+
+                                  const SizedBox(height: 12),
+
+                                  // BULLET POINTS
+                                  _bulletPoint(
+                                    "You must attend on the specified date.",
+                                    isDark,
+                                  ),
+                                  _bulletPoint(
+                                    "Fees are non-refundable unless the event is cancelled.",
+                                    isDark,
+                                  ),
+                                  _bulletPoint(
+                                    "Event content is the intellectual property of Coach Hub.",
+                                    isDark,
+                                  ),
+                                  _bulletPoint(
+                                    "By joining, you accept all the above terms.",
+                                    isDark,
+                                  ),
+
+                                  const SizedBox(height: 24),
+
+                                  // CLOSE BUTTON
+                                  SizedBox(
+                                    width: double.infinity,
+                                    child: TextButton(
+                                      style: TextButton.styleFrom(
+                                        backgroundColor: AppColors.primary,
+                                        padding: const EdgeInsets.symmetric(
+                                          vertical: 12,
+                                        ),
+                                        shape: RoundedRectangleBorder(
+                                          borderRadius: BorderRadius.circular(
+                                            10,
+                                          ),
+                                        ),
+                                      ),
+                                      onPressed: () => Navigator.pop(context),
+                                      child: const Text(
+                                        "Close",
+                                        style: TextStyle(
+                                          color: Colors.white,
+                                          fontWeight: FontWeight.bold,
+                                        ),
                                       ),
                                     ),
-                                    onPressed: () => Navigator.pop(context),
                                   ),
-                                ),
-                              ],
+                                ],
+                              ),
                             ),
-                          );
-                        },
-                      ),
+                          ),
+                        );
+                      },
                     ),
+                  ),
 
-                    const SizedBox(height: 40),
-                  ],
-                ),
+                  const SizedBox(height: 40),
+                ],
               ),
             ),
           ],
@@ -463,23 +545,21 @@ class _EventDetailPageState extends State<EventDetailPage> {
         Icon(
           icon,
           size: 16,
-          color: isDark ? AppColors.darkSubText : AppColors.textLight,
+          color: isDark ? AppColors.darkSubText : AppColors.primary,
         ),
         const SizedBox(width: 6),
         Text(
           text,
           style: TextStyle(
             fontSize: 14,
-            color: isDark ? AppColors.darkSubText : AppColors.textLight,
+            color: isDark ? AppColors.darkSubText : AppColors.textDark,
           ),
         ),
       ],
     );
   }
 
-  // -------------------------------------------------------
-  // YOUR EXISTING RICH TEXT SECTION
-  // -------------------------------------------------------
+  // ⭐ RICH TEXT SECTION
   Widget buildRichTextSection(bool isDark) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -557,7 +637,8 @@ class NumberedText extends StatelessWidget {
           "$number.",
           style: TextStyle(
             fontSize: 16,
-            color: isDark ? AppColors.darkText : AppColors.textDark,
+            color: AppColors.primary,
+            fontWeight: FontWeight.bold,
           ),
         ),
         const SizedBox(width: 8),

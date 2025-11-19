@@ -3,7 +3,7 @@ import 'package:coach_hub/features/zoom/mock_zoom_meeting_page.dart';
 import 'package:coach_hub/features/profile/profile_page.dart';
 import 'package:flutter/material.dart';
 import '../../core/theme/app_colors.dart';
-import 'package:coach_hub/model/Event_Model.dart';
+import 'package:coach_hub/model/event_model.dart';
 import 'EventDetailPage.dart';
 
 class HomePage extends StatefulWidget {
@@ -22,36 +22,50 @@ class _HomePageState extends State<HomePage> {
       title: "Startup Pitch Day & Networking Mixer",
       time: "10:00 AM, Oct 28 2025",
       description:
-          "**Relive the excitement!** This annual event brought together 15 innovative student-led startups, investors, and mentors. Attendees enjoyed live pitches, networking sessions, and exclusive funding insights.",
-      imageUrl: "https://picsum.photos/400/200?random=4",
+          "**Relive the excitement!** This annual event brought together 15 innovative student-led startups...",
+      imageAsset: "assets/images/image.1.jpg",
+      price: 0.0, // FREE
+      slots: 40,
     ),
+
     Event(
       title: "AI Trends & Ethical Governance Talk (LIVE)",
       time: "4:30 PM, Nov 14 2025",
       description:
-          "**Happening now!** Join renowned AI expert Dr. Ben Carter as he explores the future of ethical AI, data privacy, global regulations, and responsible innovation in the era of automation.",
-      imageUrl: "https://picsum.photos/400/200?random=5",
+          "**Happening now!** Join renowned AI expert Dr. Ben Carter as he explores the future of ethical AI...",
+      imageAsset: "assets/images/image.2.jpg",
+      price: 49.99, // PAID
+      slots: 25,
     ),
+
     Event(
       title: "Tech Seminar: Next-Gen Flutter Development",
       time: "03:00 PM, Nov 15 2025",
       description:
-          "Discover future-proof Flutter strategies including Flutter 4.0 updates, Clean Architecture, BLoC vs Riverpod, AI-powered UI generation, performance optimization, and real-world enterprise app case studies.",
-      imageUrl: "https://picsum.photos/400/200?random=1",
+          "Discover future-proof Flutter strategies including Flutter 4.0 updates...",
+      imageAsset: "assets/images/image.3.jpg",
+      price: 19.99, // PAID
+      slots: 5,
     ),
+
     Event(
       title: "Cloud Expo: AWS, Azure & Google Cloud",
       time: "11:00 AM, Dec 5 2025",
       description:
-          "Learn about multi-cloud solutions, serverless computing, Kubernetes orchestration, DevOps automations, and real-time disaster recovery deployments from cloud architects and industry professionals.",
-      imageUrl: "https://picsum.photos/400/200?random=6",
+          "Learn about multi-cloud solutions, serverless computing, Kubernetes...",
+      imageAsset: "assets/images/image.4.jpg",
+      price: 0.0, // FREE
+      slots: 80,
     ),
+
     Event(
       title: "Cybersecurity Workshop & CTF Challenge",
       time: "09:30 AM, Dec 18 2025",
       description:
-          "Hands-on cybersecurity lab covering ethical hacking, OWASP vulnerabilities, SIEM tools, incident response, and live Capture The Flag competition with exciting rewards.",
-      imageUrl: "https://picsum.photos/400/200?random=7",
+          "Hands-on cybersecurity lab covering ethical hacking, OWASP vulnerabilities...",
+      imageAsset: "assets/images/image.5.jpg",
+      price: 79.99, // PAID
+      slots: 10,
     ),
   ];
 
@@ -140,11 +154,28 @@ class _HomePageState extends State<HomePage> {
       onTap: () {
         Navigator.push(
           context,
-          MaterialPageRoute(
-            builder: (_) => UpcomingEventsPage(events: allEvents),
+          PageRouteBuilder(
+            transitionDuration: const Duration(milliseconds: 450),
+            reverseTransitionDuration: const Duration(milliseconds: 350),
+
+            pageBuilder: (_, animation, __) {
+              final curved = CurvedAnimation(
+                parent: animation,
+                curve: Curves.easeOutCubic,
+              );
+
+              return FadeTransition(
+                opacity: curved,
+                child: ScaleTransition(
+                  scale: Tween<double>(begin: 0.94, end: 1.0).animate(curved),
+                  child: UpcomingEventsPage(events: allEvents),
+                ),
+              );
+            },
           ),
         );
       },
+
       child: Container(
         height: 70,
         decoration: BoxDecoration(
@@ -163,6 +194,7 @@ class _HomePageState extends State<HomePage> {
             ),
           ],
         ),
+
         child: Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
@@ -284,12 +316,19 @@ class _HomePageState extends State<HomePage> {
             // IMAGE
             ClipRRect(
               borderRadius: BorderRadius.circular(18),
-              child: Image.network(
-                event.imageUrl,
-                height: 160,
-                width: double.infinity,
-                fit: BoxFit.cover,
-              ),
+              child: event.imageAsset != null
+                  ? Image.asset(
+                      event.imageAsset!,
+                      height: 160,
+                      width: double.infinity,
+                      fit: BoxFit.cover,
+                    )
+                  : Image.network(
+                      event.imageUrl!,
+                      height: 160,
+                      width: double.infinity,
+                      fit: BoxFit.cover,
+                    ),
             ),
 
             const SizedBox(height: 16),
@@ -364,8 +403,21 @@ class _HomePageState extends State<HomePage> {
                   onPressed: () {
                     Navigator.push(
                       context,
-                      MaterialPageRoute(
-                        builder: (_) => EventDetailPage(event: event),
+                      PageRouteBuilder(
+                        transitionDuration: const Duration(milliseconds: 500),
+                        pageBuilder: (_, __, ___) =>
+                            EventDetailPage(event: event),
+                        transitionsBuilder: (_, animation, __, child) {
+                          var curve = CurvedAnimation(
+                            parent: animation,
+                            curve: Curves.easeOutCubic,
+                          );
+
+                          return Transform.scale(
+                            scale: 0.88 + (0.12 * curve.value),
+                            child: FadeTransition(opacity: curve, child: child),
+                          );
+                        },
                       ),
                     );
                   },
