@@ -87,7 +87,7 @@ class EventCard extends StatelessWidget {
               ),
               child: Image.network(
                 imageUrl,
-                height: 180,
+                height: 200,
                 width: double.infinity,
                 fit: BoxFit.cover,
               ),

@@ -1,3 +1,4 @@
+import 'package:coach_hub/features/home/upcoming_events_page.dart';
 import 'package:coach_hub/features/zoom/mock_zoom_meeting_page.dart';
 import 'package:coach_hub/features/profile/profile_page.dart';
 import 'package:flutter/material.dart';
@@ -21,20 +22,36 @@ class _HomePageState extends State<HomePage> {
       title: "Startup Pitch Day & Networking Mixer",
       time: "10:00 AM, Oct 28 2025",
       description:
-          "**Relive the excitement!** This annual event featured 15 top student-led startups...",
+          "**Relive the excitement!** This annual event brought together 15 innovative student-led startups, investors, and mentors. Attendees enjoyed live pitches, networking sessions, and exclusive funding insights.",
       imageUrl: "https://picsum.photos/400/200?random=4",
     ),
     Event(
       title: "AI Trends & Ethical Governance Talk (LIVE)",
       time: "4:30 PM, Nov 14 2025",
-      description: "**Happening now!** Join leading expert Dr. Ben Carter...",
+      description:
+          "**Happening now!** Join renowned AI expert Dr. Ben Carter as he explores the future of ethical AI, data privacy, global regulations, and responsible innovation in the era of automation.",
       imageUrl: "https://picsum.photos/400/200?random=5",
     ),
     Event(
       title: "Tech Seminar: Next-Gen Flutter Development",
-      time: "3 PM, Nov 15 2025",
-      description: "Discover the future of cross-platform development...",
+      time: "03:00 PM, Nov 15 2025",
+      description:
+          "Discover future-proof Flutter strategies including Flutter 4.0 updates, Clean Architecture, BLoC vs Riverpod, AI-powered UI generation, performance optimization, and real-world enterprise app case studies.",
       imageUrl: "https://picsum.photos/400/200?random=1",
+    ),
+    Event(
+      title: "Cloud Expo: AWS, Azure & Google Cloud",
+      time: "11:00 AM, Dec 5 2025",
+      description:
+          "Learn about multi-cloud solutions, serverless computing, Kubernetes orchestration, DevOps automations, and real-time disaster recovery deployments from cloud architects and industry professionals.",
+      imageUrl: "https://picsum.photos/400/200?random=6",
+    ),
+    Event(
+      title: "Cybersecurity Workshop & CTF Challenge",
+      time: "09:30 AM, Dec 18 2025",
+      description:
+          "Hands-on cybersecurity lab covering ethical hacking, OWASP vulnerabilities, SIEM tools, incident response, and live Capture The Flag competition with exciting rewards.",
+      imageUrl: "https://picsum.photos/400/200?random=7",
     ),
   ];
 
@@ -80,18 +97,107 @@ class _HomePageState extends State<HomePage> {
   // EVENTS LIST
   Widget _eventsList(BuildContext context) {
     return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
       children: [
+        // SEARCH stays fixed
         Padding(padding: const EdgeInsets.all(16), child: _buildSearchField()),
+
+        // SCROLLABLE CONTENT BELOW
         Expanded(
-          child: ListView.builder(
-            padding: const EdgeInsets.only(bottom: 20),
-            itemCount: displayedEvents.length,
-            itemBuilder: (context, index) {
-              return _eventCard(displayedEvents[index]);
-            },
+          child: SingleChildScrollView(
+            child: Column(
+              children: [
+                // UPCOMING BANNER (scrolls)
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 16),
+                  child: _comingSoonBanner(),
+                ),
+
+                const SizedBox(height: 16),
+
+                // MAIN EVENT LIST (scrolls)
+                ListView.builder(
+                  padding: const EdgeInsets.only(bottom: 20),
+                  shrinkWrap: true, // IMPORTANT
+                  physics: const NeverScrollableScrollPhysics(), // IMPORTANT
+                  itemCount: displayedEvents.length,
+                  itemBuilder: (context, index) {
+                    return _eventCard(displayedEvents[index]);
+                  },
+                ),
+              ],
+            ),
           ),
         ),
       ],
+    );
+  }
+
+  Widget _comingSoonBanner() {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+
+    return GestureDetector(
+      onTap: () {
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (_) => UpcomingEventsPage(events: allEvents),
+          ),
+        );
+      },
+      child: Container(
+        height: 70,
+        decoration: BoxDecoration(
+          color: isDark ? AppColors.darkCard : AppColors.background,
+          borderRadius: BorderRadius.circular(18),
+          boxShadow: [
+            BoxShadow(
+              color: isDark ? AppColors.darkLightShadow : AppColors.lightShadow,
+              offset: const Offset(-4, -4),
+              blurRadius: 8,
+            ),
+            BoxShadow(
+              color: isDark ? AppColors.darkDarkShadow : AppColors.darkShadow,
+              offset: const Offset(4, 4),
+              blurRadius: 8,
+            ),
+          ],
+        ),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Padding(
+              padding: const EdgeInsets.only(left: 20),
+              child: Text(
+                "Coming Soon",
+                style: TextStyle(
+                  fontSize: 18,
+                  fontWeight: FontWeight.bold,
+                  color: isDark ? AppColors.darkText : AppColors.textDark,
+                ),
+              ),
+            ),
+
+            Padding(
+              padding: const EdgeInsets.only(right: 20),
+              child: Row(
+                children: [
+                  Text(
+                    "Explore Upcoming Events",
+                    style: TextStyle(
+                      fontSize: 14,
+                      color: AppColors.primary,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                  const SizedBox(width: 6),
+                  Icon(Icons.arrow_forward, color: AppColors.primary, size: 18),
+                ],
+              ),
+            ),
+          ],
+        ),
+      ),
     );
   }
 
