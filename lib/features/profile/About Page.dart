@@ -3,33 +3,87 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../core/theme/app_colors.dart';
 import '../../core/theme/neumorphic_box.dart';
+import 'package:flutter_staggered_animations/flutter_staggered_animations.dart';
 
 class AboutPage extends StatelessWidget {
   const AboutPage({super.key});
+
   @override
   Widget build(BuildContext context) {
     final isDark = context.watch<ThemeProvider>().isDarkMode;
+
     return Scaffold(
       backgroundColor: isDark ? AppColors.darkBackground : AppColors.background,
       appBar: AppBar(
         title: const Text("About"),
         backgroundColor: AppColors.primary,
       ),
-      body: Padding(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          children: [
-            _tile(
-              Icons.info_outline,
-              "About App",
-              "This app showcases events, profile and Zoom UI.",
-              isDark,
-            ),
-            const SizedBox(height: 12),
-            _tile(Icons.verified, "Version", "1.0.0", isDark),
-            const SizedBox(height: 12),
-            _tile(Icons.email, "Contact", "support@test.com", isDark),
-          ],
+
+      body: AnimationLimiter(
+        child: SingleChildScrollView(
+          padding: const EdgeInsets.all(16),
+          child: Column(
+            children: [
+              /// TILE 1 — About App
+              AnimationConfiguration.staggeredList(
+                position: 0,
+                delay: const Duration(milliseconds: 100),
+                child: SlideAnimation(
+                  horizontalOffset: 40,
+                  duration: const Duration(milliseconds: 220),
+                  curve: Curves.easeOutCubic,
+                  child: FadeInAnimation(
+                    duration: const Duration(milliseconds: 160),
+                    child: _tile(
+                      Icons.info_outline,
+                      "About App",
+                      "This app showcases events, profile and Zoom UI.",
+                      isDark,
+                    ),
+                  ),
+                ),
+              ),
+
+              const SizedBox(height: 12),
+
+              /// TILE 2 — Version
+              AnimationConfiguration.staggeredList(
+                position: 1,
+                delay: const Duration(milliseconds: 100),
+                child: SlideAnimation(
+                  horizontalOffset: 40,
+                  duration: const Duration(milliseconds: 220),
+                  curve: Curves.easeOutCubic,
+                  child: FadeInAnimation(
+                    duration: const Duration(milliseconds: 160),
+                    child: _tile(Icons.verified, "Version", "1.0.0", isDark),
+                  ),
+                ),
+              ),
+
+              const SizedBox(height: 12),
+
+              /// TILE 3 — Contact
+              AnimationConfiguration.staggeredList(
+                position: 2,
+                delay: const Duration(milliseconds: 100),
+                child: SlideAnimation(
+                  horizontalOffset: 40,
+                  duration: const Duration(milliseconds: 220),
+                  curve: Curves.easeOutCubic,
+                  child: FadeInAnimation(
+                    duration: const Duration(milliseconds: 160),
+                    child: _tile(
+                      Icons.email,
+                      "Contact",
+                      "support@test.com",
+                      isDark,
+                    ),
+                  ),
+                ),
+              ),
+            ],
+          ),
         ),
       ),
     );

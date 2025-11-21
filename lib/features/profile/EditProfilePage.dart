@@ -1,8 +1,11 @@
 import 'package:coach_hub/core/theme/dark_mode.dart';
+import 'package:coach_hub/core/widget/animated_item.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../core/theme/app_colors.dart';
 import '../../core/theme/neumorphic_box.dart';
+
+import 'package:flutter_staggered_animations/flutter_staggered_animations.dart';
 
 class EditProfilePage extends StatefulWidget {
   final String name;
@@ -15,6 +18,7 @@ class EditProfilePage extends StatefulWidget {
 
 class _EditProfilePageState extends State<EditProfilePage> {
   late TextEditingController _nameController;
+
   @override
   void initState() {
     super.initState();
@@ -24,70 +28,90 @@ class _EditProfilePageState extends State<EditProfilePage> {
   @override
   Widget build(BuildContext context) {
     final isDark = context.watch<ThemeProvider>().isDarkMode;
+
     return Scaffold(
       backgroundColor: isDark ? AppColors.darkBackground : AppColors.background,
       appBar: AppBar(
         backgroundColor: AppColors.primary,
         title: const Text("Edit Profile"),
       ),
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.all(18),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            _neumorphicField("Name", _nameController, isDark),
-            const SizedBox(height: 20),
-            _neumorphicReadOnly("Email", widget.email, isDark),
-            const SizedBox(height: 30),
-            Row(
-              children: [
-                Expanded(
-                  child: ElevatedButton(
-                    onPressed: () {
-                      Navigator.pop(context, {
-                        'name': _nameController.text,
-                        'email': widget.email,
-                      });
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(
-                          content: Text("Profile updated successfully!"),
+
+      body: AnimationLimiter(
+        child: SingleChildScrollView(
+          padding: const EdgeInsets.all(18),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              /// Name Field Animation
+              AnimatedItem(
+                position: 0,
+                child: _neumorphicField("Name", _nameController, isDark),
+              ),
+              const SizedBox(height: 20),
+
+              /// Email Field Animation
+              AnimatedItem(
+                position: 1,
+                child: _neumorphicReadOnly("Email", widget.email, isDark),
+              ),
+              const SizedBox(height: 30),
+
+              /// Buttons Animation
+              AnimatedItem(
+                position: 2,
+                child: Row(
+                  children: [
+                    Expanded(
+                      child: ElevatedButton(
+                        onPressed: () {
+                          Navigator.pop(context, {
+                            'name': _nameController.text,
+                            'email': widget.email,
+                          });
+
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            const SnackBar(
+                              content: Text("Profile updated successfully!"),
+                              backgroundColor: AppColors.primary,
+                            ),
+                          );
+                        },
+                        style: ElevatedButton.styleFrom(
                           backgroundColor: AppColors.primary,
+                          padding: const EdgeInsets.symmetric(vertical: 16),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(16),
+                          ),
                         ),
-                      );
-                    },
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: AppColors.primary,
-                      padding: const EdgeInsets.symmetric(vertical: 16),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(16),
+                        child: const Text(
+                          "Save Changes",
+                          style: TextStyle(color: Colors.white),
+                        ),
                       ),
                     ),
-                    child: const Text(
-                      "Save Changes",
-                      style: TextStyle(color: Colors.white),
-                    ),
-                  ),
-                ),
-                const SizedBox(width: 12),
-                Expanded(
-                  child: OutlinedButton(
-                    onPressed: () => Navigator.pop(context),
-                    style: OutlinedButton.styleFrom(
-                      side: const BorderSide(color: AppColors.primary),
-                      padding: const EdgeInsets.symmetric(vertical: 16),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(16),
+                    const SizedBox(width: 12),
+
+                    Expanded(
+                      child: OutlinedButton(
+                        onPressed: () => Navigator.pop(context),
+                        style: OutlinedButton.styleFrom(
+                          side: const BorderSide(color: AppColors.primary),
+                          padding: const EdgeInsets.symmetric(vertical: 16),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(16),
+                          ),
+                        ),
+                        child: const Text(
+                          "Cancel",
+                          style: TextStyle(color: AppColors.primary),
+                        ),
                       ),
                     ),
-                    child: const Text(
-                      "Cancel",
-                      style: TextStyle(color: AppColors.primary),
-                    ),
-                  ),
+                  ],
                 ),
-              ],
-            ),
-          ],
+              ),
+            ],
+          ),
         ),
       ),
     );

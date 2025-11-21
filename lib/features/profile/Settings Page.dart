@@ -6,6 +6,8 @@ import 'package:provider/provider.dart';
 import '../../core/theme/app_colors.dart';
 import '../../core/theme/neumorphic_box.dart';
 
+import 'package:flutter_staggered_animations/flutter_staggered_animations.dart';
+
 class SettingsPage extends StatefulWidget {
   const SettingsPage({super.key});
 
@@ -15,9 +17,11 @@ class SettingsPage extends StatefulWidget {
 
 class _SettingsPageState extends State<SettingsPage> {
   bool notificationsEnabled = false;
+
   @override
   Widget build(BuildContext context) {
     final isDark = context.watch<ThemeProvider>().isDarkMode;
+
     return Scaffold(
       backgroundColor: isDark ? AppColors.darkBackground : AppColors.background,
       appBar: AppBar(
@@ -27,94 +31,150 @@ class _SettingsPageState extends State<SettingsPage> {
           style: TextStyle(color: isDark ? AppColors.darkText : Colors.white),
         ),
       ),
-      body: ListView(
-        padding: const EdgeInsets.all(16),
-        children: [
-          Padding(
-            padding: const EdgeInsets.only(left: 5, bottom: 12),
-            child: Text(
-              "App Settings",
-              style: TextStyle(
-                fontSize: 22,
-                fontWeight: FontWeight.bold,
-                color: isDark ? AppColors.darkText : AppColors.textDark,
-              ),
-            ),
-          ),
-          _neumorphicCard(
-            isDark: isDark,
+
+      body: SafeArea(
+        child: AnimationLimiter(
+          child: SingleChildScrollView(
+            padding: const EdgeInsets.all(16),
             child: Column(
               children: [
-                _switchTile(
-                  icon: Icons.notifications_none,
-                  title: "Enable Notifications",
-                  subtitle: "Get notified about events",
-                  value: notificationsEnabled,
-                  onChanged: (val) {
-                    setState(() => notificationsEnabled = val);
-                  },
-                  isDark: isDark,
-                ),
-                _tileDivider(isDark),
-                _switchTile(
-                  icon: Icons.dark_mode_outlined,
-                  title: "Dark Mode",
-                  subtitle: isDark ? "Dark mode is ON" : "Dark mode is OFF",
-                  value: isDark,
-                  onChanged: (val) =>
-                      context.read<ThemeProvider>().toggleTheme(val),
-                  isDark: isDark,
-                ),
-              ],
-            ),
-          ),
-          const SizedBox(height: 22),
-          _neumorphicCard(
-            isDark: isDark,
-            child: Column(
-              children: [
-                _settingsTile(
-                  icon: Icons.language,
-                  title: "Language",
-                  subtitle: "English",
-                  onTap: () {},
-                  isDark: isDark,
-                ),
-                _tileDivider(isDark),
-                _settingsTile(
-                  icon: Icons.lock_outline,
-                  title: "Privacy",
-                  subtitle: "Manage your privacy & data",
-                  onTap: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(builder: (_) => const PrivacyPage()),
-                    );
-                  },
-                  isDark: isDark,
-                ),
-                _tileDivider(isDark),
-                _settingsTile(
-                  icon: Icons.help_outline,
-                  title: "Help & Support",
-                  subtitle: "Get help or contact support",
-                  onTap: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (_) => const HelpSupportPage(),
+                // TITLE
+                AnimationConfiguration.staggeredList(
+                  position: 0,
+                  delay: const Duration(milliseconds: 100),
+                  child: SlideAnimation(
+                    horizontalOffset: 40,
+                    curve: Curves.easeOutCubic,
+                    child: FadeInAnimation(
+                      child: Padding(
+                        padding: const EdgeInsets.only(left: 5, bottom: 12),
+                        child: Text(
+                          "App Settings",
+                          style: TextStyle(
+                            fontSize: 22,
+                            fontWeight: FontWeight.bold,
+                            color: isDark
+                                ? AppColors.darkText
+                                : AppColors.textDark,
+                          ),
+                        ),
                       ),
-                    );
-                  },
-                  isDark: isDark,
+                    ),
+                  ),
+                ),
+
+                // CARD 1
+                AnimationConfiguration.staggeredList(
+                  position: 1,
+                  delay: const Duration(milliseconds: 100),
+                  child: SlideAnimation(
+                    horizontalOffset: 40,
+                    duration: const Duration(milliseconds: 220),
+                    child: FadeInAnimation(
+                      duration: const Duration(milliseconds: 160),
+                      child: _neumorphicCard(
+                        isDark: isDark,
+                        child: Column(
+                          children: [
+                            _switchTile(
+                              icon: Icons.notifications_none,
+                              title: "Enable Notifications",
+                              subtitle: "Get notified about events",
+                              value: notificationsEnabled,
+                              onChanged: (val) {
+                                setState(() => notificationsEnabled = val);
+                              },
+                              isDark: isDark,
+                            ),
+                            _tileDivider(isDark),
+                            _switchTile(
+                              icon: Icons.dark_mode_outlined,
+                              title: "Dark Mode",
+                              subtitle: isDark
+                                  ? "Dark mode is ON"
+                                  : "Dark mode is OFF",
+                              value: isDark,
+                              onChanged: (val) => context
+                                  .read<ThemeProvider>()
+                                  .toggleTheme(val),
+                              isDark: isDark,
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+
+                const SizedBox(height: 22),
+
+                // CARD 2
+                AnimationConfiguration.staggeredList(
+                  position: 2,
+                  delay: const Duration(milliseconds: 100),
+                  child: SlideAnimation(
+                    horizontalOffset: 40,
+                    duration: const Duration(milliseconds: 220),
+                    child: FadeInAnimation(
+                      duration: const Duration(milliseconds: 160),
+                      child: _neumorphicCard(
+                        isDark: isDark,
+                        child: Column(
+                          children: [
+                            _settingsTile(
+                              icon: Icons.language,
+                              title: "Language",
+                              subtitle: "English",
+                              onTap: () {},
+                              isDark: isDark,
+                            ),
+                            _tileDivider(isDark),
+
+                            _settingsTile(
+                              icon: Icons.lock_outline,
+                              title: "Privacy",
+                              subtitle: "Manage your privacy & data",
+                              onTap: () {
+                                Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (_) => const PrivacyPage(),
+                                  ),
+                                );
+                              },
+                              isDark: isDark,
+                            ),
+                            _tileDivider(isDark),
+
+                            _settingsTile(
+                              icon: Icons.help_outline,
+                              title: "Help & Support",
+                              subtitle: "Get help or contact support",
+                              onTap: () {
+                                Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (_) => const HelpSupportPage(),
+                                  ),
+                                );
+                              },
+                              isDark: isDark,
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ),
                 ),
               ],
             ),
           ),
-        ],
+        ),
       ),
     );
   }
+
+  // UI Helpers --------------------------------------------------------
 
   Widget _neumorphicCard({required Widget child, required bool isDark}) =>
       Container(
@@ -219,8 +279,8 @@ class _SettingsPageState extends State<SettingsPage> {
       height: 1,
       thickness: 1,
       color: isDark
-          ? Colors.white.withOpacity(0.20) // visible light line
-          : Colors.black.withOpacity(0.15), // visible dark line
+          ? Colors.white.withOpacity(0.20)
+          : Colors.black.withOpacity(0.15),
     ),
   );
 }
